@@ -7,6 +7,7 @@ import { DashboardPage } from '../pages/dashboard.page';
 import { EditUserForm } from '../pages/components/edit-user.form';
 import { EmployeeListPage } from '../pages/employee-list.page';
 import { LoginPage } from '../pages/login.page';
+import { MyInfoPage } from '../pages/my-info.page';
 import { SystemUsersPage } from '../pages/system-users.page';
 
 type PageFixtures = {
@@ -17,6 +18,7 @@ type PageFixtures = {
   addEmployeeForm: AddEmployeeForm;
   addUserForm: AddUserForm;
   editUserForm: EditUserForm;
+  myInfoPage: MyInfoPage;
   createdEmployee: NewEmployee;
   createdUser: NewSystemUser;
 };
@@ -44,6 +46,9 @@ export const test = base.extend<PageFixtures & RoleOptions>({
   },
   editUserForm: async ({ page }, use) => {
     await use(new EditUserForm(page));
+  },
+  myInfoPage: async ({ page }, use) => {
+    await use(new MyInfoPage(page));
   },
   createdEmployee: async ({ role, employeeListPage, addEmployeeForm }, use, testInfo) => {
     testInfo.skip(role !== 'admin', 'ESS cannot open PIM');
