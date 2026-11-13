@@ -10,7 +10,7 @@ test('shows the login form', async ({ loginPage }) => {
 
 test('requires username and password', async ({ loginPage }) => {
   await loginPage.open();
-  await loginPage.submit.click();
+  await loginPage.submitButton.click();
   await loginPage.expectRequiredFields();
 });
 
@@ -21,6 +21,7 @@ test('rejects invalid credentials', async ({ loginPage }) => {
   await expect(loginPage.page).toHaveURL(new RegExp(`${routes.login}$`));
 });
 
+// ESS user disabled because DB resets every hour
 for (const role of roles.filter((role) => role !== 'ess')) {
   test(`${role} signs in and lands on the dashboard`, async ({ loginPage }) => {
     const { username, password } = credentialsFor(role);

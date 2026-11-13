@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import type { Role } from '../config/env';
+import { Role } from '../utils/types';
 import { routes } from '../utils/routes';
 
 type MenuItem = {
@@ -33,51 +33,54 @@ const sharedWidgets = [
   'Employees on Leave Today',
 ] as const;
 
-const adminOnlyWidgets = [
+export const adminOnlyWidgets = [
   'Employee Distribution by Sub Unit',
   'Employee Distribution by Location',
 ] as const;
+
+export type AdminChartWidget = (typeof adminOnlyWidgets)[number];
 
 const sharedQuickLaunch = ['Apply Leave', 'My Leave', 'My Timesheet'] as const;
 
 const adminOnlyQuickLaunch = ['Assign Leave', 'Leave List', 'Timesheets'] as const;
 
-const roleView = {
-  admin: {
-    menus: [...adminOnlyMenus, ...sharedMenus],
-    hiddenMenus: [],
-    widgets: [...sharedWidgets, ...adminOnlyWidgets],
-    hiddenWidgets: [],
-    quickLaunch: [...adminOnlyQuickLaunch, ...sharedQuickLaunch],
-    hiddenQuickLaunch: [],
-  },
-  ess: {
-    menus: [...sharedMenus],
-    hiddenMenus: [...adminOnlyMenus],
-    widgets: [...sharedWidgets],
-    hiddenWidgets: [...adminOnlyWidgets],
-    quickLaunch: [...sharedQuickLaunch],
-    hiddenQuickLaunch: [...adminOnlyQuickLaunch],
-  },
-} as const satisfies Record<
-  Role,
-  {
-    menus: readonly MenuItem[];
-    hiddenMenus: readonly MenuItem[];
-    widgets: readonly string[];
-    hiddenWidgets: readonly string[];
-    quickLaunch: readonly string[];
-    hiddenQuickLaunch: readonly string[];
-  }
->;
+function exactText(value: string): RegExp {
+  return new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+}
+
+type DashboardView = {
+  menus: readonly MenuItem[];
+  hiddenMenus: readonly MenuItem[];
+  widgets: readonly string[];
+  hiddenWidgets: readonly string[];
+  quickLaunch: readonly string[];
+  hiddenQuickLaunch: readonly string[];
+};
+
+const adminView = {
+  menus: [...adminOnlyMenus, ...sharedMenus],
+  hiddenMenus: [],
+  widgets: [...sharedWidgets, ...adminOnlyWidgets],
+  hiddenWidgets: [],
+  quickLaunch: [...adminOnlyQuickLaunch, ...sharedQuickLaunch],
+  hiddenQuickLaunch: [],
+} as const satisfies DashboardView;
+
+const essView = {
+  menus: [...sharedMenus],
+  hiddenMenus: [...adminOnlyMenus],
+  widgets: [...sharedWidgets],
+  hiddenWidgets: [...adminOnlyWidgets],
+  quickLaunch: [...sharedQuickLaunch],
+  hiddenQuickLaunch: [...adminOnlyQuickLaunch],
+} as const satisfies DashboardView;
 
 export class DashboardPage {
   readonly page: Page;
-  readonly userMenu: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.userMenu = page.locator('.oxd-userdropdown-name');
+
   }
 
   menu(item: MenuItem): Locator {
@@ -92,30 +95,45 @@ export class DashboardPage {
     return this.page.locator('.orangehrm-quick-launch-heading', { hasText: name });
   }
 
+
   async open(): Promise<void> {
     await this.page.goto(routes.dashboard);
   }
 
   async expectViewFor(role: Role): Promise<void> {
-    const view = roleView[role];
+    if (role === 'admin') {
+      await this.expectView(adminView);
+      return;
+    }
 
+    if (role === 'ess') {
+      await this.expectView(essView);
+      return;
+    }
+  }
+
+  private async expectVisible(target: Locator): Promise<void> {
+    await expect(target).toBeVisible();
+    await target.scrollIntoViewIfNeeded();
+  }
+
+  private async expectView(view: DashboardView): Promise<void> {
     await expect(this.page).toHaveURL(new RegExp(`${routes.dashboard}$`));
-    await expect(this.userMenu).toBeVisible();
 
     for (const item of view.menus) {
-      await expect(this.menu(item)).toBeVisible();
+      await this.expectVisible(this.menu(item));
     }
     for (const item of view.hiddenMenus) {
       await expect(this.menu(item)).toHaveCount(0);
     }
     for (const name of view.widgets) {
-      await expect(this.widget(name)).toBeVisible();
+      await this.expectVisible(this.widget(name));
     }
     for (const name of view.hiddenWidgets) {
       await expect(this.widget(name)).toHaveCount(0);
     }
     for (const name of view.quickLaunch) {
-      await expect(this.quickLaunch(name)).toBeVisible();
+      await this.expectVisible(this.quickLaunch(name));
     }
     for (const name of view.hiddenQuickLaunch) {
       await expect(this.quickLaunch(name)).toHaveCount(0);

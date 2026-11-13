@@ -6,11 +6,11 @@ import { routes } from '../utils/routes';
 
 ensureAuthDir();
 
+// ESS user disabled because DB resets every hour
 for (const role of roles.filter((role) => role !== 'ess')) {
   setup(`authenticate as ${role}`, async ({ page }) => {
     const { username, password } = credentialsFor(role);
-    console.log('username', username);
-    console.log('password', password);
+
     const loginPage = new LoginPage(page);
 
     await loginPage.open();

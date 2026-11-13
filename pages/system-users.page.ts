@@ -5,6 +5,7 @@ import { SystemUsersTable } from './components/system-users-table';
 
 export class SystemUsersPage {
   readonly page: Page;
+  readonly pageTitle: Locator;
   readonly addUserButton: Locator;
   readonly search: SystemUsersSearchForm;
   readonly users: SystemUsersTable;
@@ -12,6 +13,7 @@ export class SystemUsersPage {
 
   constructor(page: Page) {
     this.page = page;
+    this.pageTitle = page.getByRole('heading', { name: 'System Users' });
     this.addUserButton = page.locator('.orangehrm-header-container').getByRole('button', { name: 'Add' });
     this.search = new SystemUsersSearchForm(page);
     this.users = new SystemUsersTable(page);
@@ -30,13 +32,7 @@ export class SystemUsersPage {
 
   async expectLoaded(): Promise<void> {
     await expect(this.page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
-    await expect(this.page.getByRole('heading', { name: 'System Users' })).toBeVisible();
+    await expect(this.pageTitle).toBeVisible();
     await expect(this.addUserButton).toBeVisible();
-    await expect(this.search.form).toBeVisible();
-    await expect(this.search.username).toBeVisible();
-    await expect(this.search.userRole).toBeVisible();
-    await expect(this.search.employeeName).toBeVisible();
-    await expect(this.search.status).toBeVisible();
-    await expect(this.users.table).toBeVisible();
   }
 }

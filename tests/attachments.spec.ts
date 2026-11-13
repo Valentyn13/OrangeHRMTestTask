@@ -9,14 +9,16 @@ test('uploads, downloads, and deletes an attachment', async ({ myInfoPage }) => 
   const comment = `comment${Date.now().toString(36)}`;
 
   await myInfoPage.openFromMenu();
-
+  await expect(myInfoPage.page).toHaveURL(/\/pim\/viewPersonalDetails\/empNumber\/\d+$/);
+  
   await myInfoPage.addButton.click();
   await expect(myInfoPage.file).toBeAttached();
   await expect(myInfoPage.comment).toBeVisible();
   await expect(myInfoPage.saveButton).toBeVisible();
 
   await myInfoPage.uploadFileAndComment(filePath, comment);
-  await myInfoPage.expectFileAndCommentToBeAttached({ fileName, comment });
+
+  await expect(myInfoPage.row({ fileName, comment })).toBeInViewport({ timeout: 1_000 });
 
   const download = await myInfoPage.downloadFile({ fileName, comment });
   expect(download.suggestedFilename()).toBe(fileName);

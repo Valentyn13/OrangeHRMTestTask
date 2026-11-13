@@ -37,7 +37,6 @@ export class MyInfoPage {
   async openFromMenu(): Promise<void> {
     await this.page.goto(routes.dashboard);
     await this.page.locator(`a.oxd-main-menu-item[href="${routes.myInfo}"]`).click();
-    await expect(this.page).toHaveURL(/\/pim\/viewPersonalDetails\/empNumber\/\d+$/);
   }
 
   async uploadFileAndComment(filePath: string, comment: string): Promise<void> {
@@ -47,18 +46,8 @@ export class MyInfoPage {
     await this.saveButton.click();
   }
 
-  async expectFileAndCommentToBeAttached(attachment: Attachment): Promise<void> {
-    const row = this.row(attachment);
-    await expect(async () => {
-      await this.section.scrollIntoViewIfNeeded();
-      await row.scrollIntoViewIfNeeded();
-      await expect(row).toBeInViewport({ timeout: 1_000 });
-    }).toPass();
-  }
-
   async downloadFile(attachment: Attachment): Promise<Download> {
     const row = this.row(attachment);
-    await row.scrollIntoViewIfNeeded();
     const [download] = await Promise.all([
       this.page.waitForEvent('download'),
       row.locator('button:has(.bi-download)').click(),
@@ -68,7 +57,6 @@ export class MyInfoPage {
 
   async deleteAttachment(attachment: Attachment): Promise<void> {
     const row = this.row(attachment);
-    await row.scrollIntoViewIfNeeded();
     await row.locator('button:has(.bi-trash)').click();
     await this.confirmDeleteButton.click();
   }
