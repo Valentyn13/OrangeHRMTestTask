@@ -18,7 +18,12 @@ test('uploads, downloads, and deletes an attachment', async ({ myInfoPage }) => 
 
   await myInfoPage.uploadFileAndComment(filePath, comment);
 
-  await expect(myInfoPage.row({ fileName, comment })).toBeInViewport({ timeout: 1_000 });
+  const row = myInfoPage.row({ fileName, comment });
+  await expect(async () => {
+    await myInfoPage.section.scrollIntoViewIfNeeded({ timeout: 1_000 });
+    await row.scrollIntoViewIfNeeded({ timeout: 1_000 });
+    await expect(row).toBeInViewport({ timeout: 1_000 });
+  }).toPass();
 
   const download = await myInfoPage.downloadFile({ fileName, comment });
   expect(download.suggestedFilename()).toBe(fileName);

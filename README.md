@@ -1,24 +1,26 @@
-Example of links on the project, configure base url from them
-https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
-https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index
-https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewPersonalDetails/empNumber/7 - my info page
+# OrangeHRM Playwright tests
 
-2 roles
-Admin and ESS
+End-to-end tests for the public [OrangeHRM demo](https://opensource-demo.orangehrmlive.com).
 
-Username:fffffe3343 
-Password:1234rrR
-Role: ESS
+## Prerequisites
 
-Username:Admin
-Password: admin123
-Role: Admin
+- Node.js LTS
+- npm
 
-Configure env file, create a setup for the playwright project, where it will reuse authentication, use fixtures for page objects, configure ability to run tests for different roles
+## Setup
+
+```bash
+git clone <repo-url>
+npx playwright install
+cp .env.example .env
+```
 
 
-Go to login page https://opensource-demo.orangehrmlive.com/web/index.php/auth/login and using playwright MCP create a page object model for it
+## Run
 
-After login admin lands on https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index
-
-and ESS user lands on https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index but it has different view
+```bash
+npm test                 # all projects (setup + login + admin)
+npm run test:login       # login specs only
+npm run test:admin       # admin specs (runs auth setup first)
+npm run report           # open the last HTML report
+```
