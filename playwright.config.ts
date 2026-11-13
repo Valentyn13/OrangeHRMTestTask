@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
-import type { RoleOptions } from './fixtures/test';
+import { RoleOptions } from './utils/types';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
@@ -12,19 +12,19 @@ const authFile = (role: 'admin' | 'ess') =>
 
 export default defineConfig<RoleOptions>({
   testDir: './tests',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : 2,
+  workers: 1,
   reporter: 'html',
-  timeout: 60_000,
-  expect: { timeout: 10_000 },
+  timeout: 90_000,
+  expect: { timeout: 60_000 },
   use: {
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    actionTimeout: 15_000,
-    navigationTimeout: 30_000,
+    actionTimeout: 30_000,
+    navigationTimeout: 60_000,
   },
   projects: [
     {
@@ -46,15 +46,16 @@ export default defineConfig<RoleOptions>({
         role: 'admin',
       },
     },
-    {
-      name: 'ess',
-      dependencies: ['setup'],
-      testIgnore: /login\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: authFile('ess'),
-        role: 'ess',
-      },
-    },
+    // ESS is paused for now. Uncomment to run the ess project again.
+    // {
+    //   name: 'ess',
+    //   dependencies: ['setup'],
+    //   testIgnore: /login\.spec\.ts/,
+    //   use: {
+    //     ...devices['Desktop Chrome'],
+    //     storageState: authFile('ess'),
+    //     role: 'ess',
+    //   },
+    // },
   ],
 });

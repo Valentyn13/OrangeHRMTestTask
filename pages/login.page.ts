@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import { routes } from '../src/routes';
+import { routes } from '../utils/routes';
 
 export class LoginPage {
   readonly page: Page;

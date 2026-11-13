@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { Role } from '../utils/types';
 
-export const roles = ['admin', 'ess'] as const;
-export type Role = (typeof roles)[number];
+
 
 const credentialKeys = {
   admin: { username: 'ADMIN_USERNAME', password: 'ADMIN_PASSWORD' },

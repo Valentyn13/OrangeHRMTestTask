@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import type { Role } from '../src/config/env';
-import { routes } from '../src/routes';
+import type { Role } from '../config/env';
+import { routes } from '../utils/routes';
 
 type MenuItem = {
   name: string;

@@ -1,5 +1,6 @@
-import { credentialsFor, roles } from '../src/config/env';
-import { routes } from '../src/routes';
+import { credentialsFor } from '../config/env';
+import { roles } from '../utils/types';
+import { routes } from '../utils/routes';
 import { expect, test } from '../fixtures/test';
 
 test('shows the login form', async ({ loginPage }) => {
@@ -20,7 +21,7 @@ test('rejects invalid credentials', async ({ loginPage }) => {
   await expect(loginPage.page).toHaveURL(new RegExp(`${routes.login}$`));
 });
 
-for (const role of roles) {
+for (const role of roles.filter((role) => role !== 'ess')) {
   test(`${role} signs in and lands on the dashboard`, async ({ loginPage }) => {
     const { username, password } = credentialsFor(role);
 

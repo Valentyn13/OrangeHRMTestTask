@@ -10,5 +10,5 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["playwright.config.ts", "src", "pages", "fixtures", "tests"]
+  "include": ["playwright.config.ts", "src", "pages", "fixtures", "tests", "config", "utils/routes.ts"]
 }
