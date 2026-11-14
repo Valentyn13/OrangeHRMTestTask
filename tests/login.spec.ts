@@ -3,21 +3,29 @@ import { roles } from '../utils/types';
 import { routes } from '../utils/routes';
 import { expect, test } from '../fixtures/test';
 
-test('shows the login form', async ({ loginPage }) => {
+test('Login page loaded and shows the login form', async ({page, loginPage }) => {
   await loginPage.open();
-  await loginPage.expectForm();
+
+  await expect(page).toHaveURL(new RegExp(`${routes.login}$`));
+  await expect(loginPage.usernameInput).toBeVisible();
+  await expect(loginPage.passwordInput).toBeVisible();
+  await expect(loginPage.submitButton).toBeVisible();
+  await expect(loginPage.forgotPassword).toBeVisible();
 });
 
-test('requires username and password', async ({ loginPage }) => {
+test('Empty login form vields validation, shows error messages', async ({ loginPage }) => {
   await loginPage.open();
+
   await loginPage.submitButton.click();
-  await loginPage.expectRequiredFields();
+  await expect(loginPage.fieldError('username')).toHaveText('Required');
+  await expect(loginPage.fieldError('password')).toHaveText('Required');
 });
 
 test('rejects invalid credentials', async ({ loginPage }) => {
   await loginPage.open();
+  
   await loginPage.login('not-a-user', 'wrong-password');
-  await loginPage.expectInvalidCredentials();
+  await expect(loginPage.alertLabel).toContainText('Invalid credentials');
   await expect(loginPage.page).toHaveURL(new RegExp(`${routes.login}$`));
 });
 

@@ -11,8 +11,8 @@ export class MyInfoPage {
   readonly section: Locator;
   readonly addButton: Locator;
   readonly table: Locator;
-  readonly file: Locator;
-  readonly comment: Locator;
+  readonly fileInput: Locator;
+  readonly commentInput: Locator;
   readonly saveButton: Locator;
   readonly confirmDeleteButton: Locator;
 
@@ -21,8 +21,8 @@ export class MyInfoPage {
     this.section = page.locator('.orangehrm-attachment');
     this.addButton = this.page.getByRole('button', { name: 'Add' });
     this.table = this.section.getByRole('table');
-    this.file = this.section.locator('input[type="file"]');
-    this.comment = this.section.getByPlaceholder('Type comment here');
+    this.fileInput = this.section.locator('input[type="file"]');
+    this.commentInput = this.section.getByPlaceholder('Type comment here');
     this.saveButton = this.section.getByRole('button', { name: 'Save' });
     this.confirmDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
   }
@@ -40,9 +40,9 @@ export class MyInfoPage {
   }
 
   async uploadFileAndComment(filePath: string, comment: string): Promise<void> {
-    await this.comment.scrollIntoViewIfNeeded();
-    await this.file.setInputFiles(filePath);
-    await this.comment.fill(comment);
+    await this.commentInput.scrollIntoViewIfNeeded();
+    await this.fileInput.setInputFiles(filePath);
+    await this.commentInput.fill(comment);
     await this.saveButton.click();
   }
 

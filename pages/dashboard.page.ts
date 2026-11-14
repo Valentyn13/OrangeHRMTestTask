@@ -44,10 +44,6 @@ const sharedQuickLaunch = ['Apply Leave', 'My Leave', 'My Timesheet'] as const;
 
 const adminOnlyQuickLaunch = ['Assign Leave', 'Leave List', 'Timesheets'] as const;
 
-function exactText(value: string): RegExp {
-  return new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
-}
-
 type DashboardView = {
   menus: readonly MenuItem[];
   hiddenMenus: readonly MenuItem[];

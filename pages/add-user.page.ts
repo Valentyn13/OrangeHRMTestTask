@@ -1,8 +1,8 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import { routes } from '../../utils/routes';
-import type { NewSystemUser } from '../../utils/types';
+import { routes } from '../utils/routes';
+import type { NewSystemUser } from '../utils/types';
 
-export class AddUserForm {
+export class AddUserPage {
   readonly form: Locator;
   readonly userRole: Locator;
   readonly employeeName: Locator;
@@ -10,7 +10,7 @@ export class AddUserForm {
   readonly username: Locator;
   readonly password: Locator;
   readonly confirmPassword: Locator;
-  readonly save: Locator;
+  readonly saveButton: Locator;
 
   constructor(private readonly page: Page) {
     this.form = page.locator('form.oxd-form');
@@ -20,19 +20,7 @@ export class AddUserForm {
     this.username = this.field('Username').locator('input');
     this.password = this.field('Password').locator('input');
     this.confirmPassword = this.field('Confirm Password').locator('input');
-    this.save = this.form.getByRole('button', { name: 'Save' });
-  }
-
-  async expectReady(): Promise<void> {
-    await expect(this.page).toHaveURL(new RegExp(`${routes.saveSystemUser}$`));
-    await expect(this.form).toBeVisible();
-    await expect(this.userRole).toBeVisible();
-    await expect(this.employeeName).toBeVisible();
-    await expect(this.status).toBeVisible();
-    await expect(this.username).toBeVisible();
-    await expect(this.password).toBeVisible();
-    await expect(this.confirmPassword).toBeVisible();
-    await expect(this.save).toBeVisible();
+    this.saveButton = this.form.getByRole('button', { name: 'Save' });
   }
 
   async create(user: NewSystemUser): Promise<void> {
@@ -42,7 +30,7 @@ export class AddUserForm {
     await this.username.fill(user.username);
     await this.password.fill(user.password);
     await this.confirmPassword.fill(user.password);
-    await this.save.click();
+    await this.saveButton.click();
     await this.page.waitForURL(new RegExp(`${routes.systemUsers}$`));
   }
 

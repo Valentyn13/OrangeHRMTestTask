@@ -1,9 +1,10 @@
 import { disposableSystemUser } from '../utils/helpers';
 import { expect, test } from '../fixtures/test';
+import { routes } from '../utils/routes';
 
-test('creates a system user for a new employee', async ({
+test('Create a system user for a new employee', async ({
   systemUsersPage,
-  addUserForm,
+  addUserPage,
   role,
   createdEmployee,
 }) => {
@@ -12,21 +13,28 @@ test('creates a system user for a new employee', async ({
   const user = disposableSystemUser(createdEmployee.fullName);
 
   await systemUsersPage.open();
+  await expect(systemUsersPage.page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
+
   await systemUsersPage.addUserButton.click();
-  await addUserForm.expectReady();
-  await addUserForm.create(user);
+
+  await addUserPage.create(user);
+
+  await expect(systemUsersPage.page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
   await systemUsersPage.searchByUsername(user.username);
 
   await expect(systemUsersPage.users.row(user)).toBeVisible();
 });
 
-test('updates the username', async ({ systemUsersPage, editUserForm, createdUser }) => {
+test('Update a system user', async ({ page, systemUsersPage, editUserPage, createdUser }) => {
   const username = `edit${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-
+  console.log('Old username', createdUser.username);
+  console.log('New username', username);
   await systemUsersPage.searchByUsername(createdUser.username);
   await systemUsersPage.users.editButton(createdUser).click();
-  await editUserForm.expectReady();
-  await editUserForm.update({ username });
+  await expect(page).toHaveURL(/\/admin\/saveSystemUser\/\d+$/);
+
+  await editUserPage.update({ username });
+
   await systemUsersPage.searchByUsername(username);
 
   await expect(

@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import { routes } from '../utils/routes';
 import { SystemUsersSearchForm } from './components/system-users-search-form';
 import { SystemUsersTable } from './components/system-users-table';
@@ -27,12 +27,5 @@ export class SystemUsersPage {
 
   async open(): Promise<void> {
     await this.page.goto(routes.systemUsers);
-    await this.expectLoaded();
-  }
-
-  async expectLoaded(): Promise<void> {
-    await expect(this.page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
-    await expect(this.pageTitle).toBeVisible();
-    await expect(this.addUserButton).toBeVisible();
   }
 }

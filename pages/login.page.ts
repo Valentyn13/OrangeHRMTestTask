@@ -33,20 +33,4 @@ export class LoginPage {
       `.oxd-input-group:has(input[name="${field}"]) .oxd-input-field-error-message`,
     );
   }
-
-  async expectForm(): Promise<void> {
-    await expect(this.usernameInput).toBeVisible();
-    await expect(this.passwordInput).toBeVisible();
-    await expect(this.submitButton).toBeVisible();
-    await expect(this.forgotPassword).toBeVisible();
-  }
-
-  async expectRequiredFields(): Promise<void> {
-    await expect(this.fieldError('username')).toHaveText('Required');
-    await expect(this.fieldError('password')).toHaveText('Required');
-  }
-
-  async expectInvalidCredentials(): Promise<void> {
-    await expect(this.alertLabel).toContainText('Invalid credentials');
-  }
 }

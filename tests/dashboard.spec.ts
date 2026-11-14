@@ -1,4 +1,4 @@
-import { expect, test } from '../fixtures/test';
+import { test } from '../fixtures/test';
 
 test('shows the dashboard for the signed-in role', async ({ dashboardPage, role }) => {
   await dashboardPage.open();

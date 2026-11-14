@@ -1,10 +1,10 @@
 import { test as base, expect } from '@playwright/test';
 import { AddEmployeeForm } from '../pages/components/add-employee.form';
-import { AddUserForm } from '../pages/components/add-user.form';
+import { AddUserPage } from '../pages/add-user.page';
 import { disposableEmployee, disposableSystemUser } from '../utils/helpers';
 import { NewEmployee, NewSystemUser, RoleOptions } from '../utils/types';
 import { DashboardPage } from '../pages/dashboard.page';
-import { EditUserForm } from '../pages/components/edit-user.form';
+import { EditUserPage } from '../pages/edit-user.page';
 import { EmployeeListPage } from '../pages/employee-list.page';
 import { LoginPage } from '../pages/login.page';
 import { MyInfoPage } from '../pages/my-info.page';
@@ -16,8 +16,8 @@ type PageFixtures = {
   systemUsersPage: SystemUsersPage;
   employeeListPage: EmployeeListPage;
   addEmployeeForm: AddEmployeeForm;
-  addUserForm: AddUserForm;
-  editUserForm: EditUserForm;
+  addUserPage: AddUserPage;
+  editUserPage: EditUserPage;
   myInfoPage: MyInfoPage;
   createdEmployee: NewEmployee;
   createdUser: NewSystemUser;
@@ -41,11 +41,11 @@ export const test = base.extend<PageFixtures & RoleOptions>({
   addEmployeeForm: async ({ page }, use) => {
     await use(new AddEmployeeForm(page));
   },
-  addUserForm: async ({ page }, use) => {
-    await use(new AddUserForm(page));
+  addUserPage: async ({ page }, use) => {
+    await use(new AddUserPage(page));
   },
-  editUserForm: async ({ page }, use) => {
-    await use(new EditUserForm(page));
+  editUserPage: async ({ page }, use) => {
+    await use(new EditUserPage(page));
   },
   myInfoPage: async ({ page }, use) => {
     await use(new MyInfoPage(page));
@@ -59,14 +59,13 @@ export const test = base.extend<PageFixtures & RoleOptions>({
     await addEmployeeForm.create(employee);
     await use(employee);
   },
-  createdUser: async ({ role, systemUsersPage, addUserForm, createdEmployee }, use, testInfo) => {
+  createdUser: async ({ role, systemUsersPage, addUserPage, createdEmployee }, use, testInfo) => {
     testInfo.skip(role !== 'admin', 'ESS cannot open Admin');
 
     const user = disposableSystemUser(createdEmployee.fullName);
     await systemUsersPage.open();
     await systemUsersPage.addUserButton.click();
-    await addUserForm.expectReady();
-    await addUserForm.create(user);
+    await addUserPage.create(user);
     await use(user);
   },
 });

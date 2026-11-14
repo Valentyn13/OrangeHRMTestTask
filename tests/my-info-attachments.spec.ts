@@ -12,8 +12,8 @@ test('uploads, downloads, and deletes an attachment', async ({ myInfoPage }) => 
   await expect(myInfoPage.page).toHaveURL(/\/pim\/viewPersonalDetails\/empNumber\/\d+$/);
   
   await myInfoPage.addButton.click();
-  await expect(myInfoPage.file).toBeAttached();
-  await expect(myInfoPage.comment).toBeVisible();
+  await expect(myInfoPage.fileInput).toBeAttached();
+  await expect(myInfoPage.commentInput).toBeVisible();
   await expect(myInfoPage.saveButton).toBeVisible();
 
   await myInfoPage.uploadFileAndComment(filePath, comment);
