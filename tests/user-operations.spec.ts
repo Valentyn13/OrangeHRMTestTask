@@ -1,15 +1,14 @@
 import { disposableSystemUser } from '../utils/helpers';
-import { expect, test } from '../fixtures/test';
+import { test } from '../fixtures';
 import { routes } from '../utils/routes';
+import { expect } from '@playwright/test';
 
 test('Create a system user for a new employee', async ({
   systemUsersPage,
   addUserPage,
-  role,
   page,
   createdEmployee,
 }) => {
-  test.skip(role !== 'admin', 'ESS cannot open Admin');
 
   const user = disposableSystemUser(createdEmployee.fullName);
 

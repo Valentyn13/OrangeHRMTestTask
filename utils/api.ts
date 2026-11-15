@@ -19,6 +19,7 @@ type CreatedEmployeeResponse = {
 
 type CreatedUserResponse = {
   data: {
+    id: number;
     userName: string;
     status: boolean;
     employee: {
@@ -31,6 +32,10 @@ type CreatedUserResponse = {
       name: UserRole;
     };
   };
+};
+
+type UserListResponse = {
+  data: { id: number }[];
 };
 
 export async function createEmployee(cookie: string, employee: NewEmployee): Promise<NewEmployee> {
@@ -73,12 +78,43 @@ export async function createUser(
     const created = JSON.parse(await readOk(response, 'createUser')) as CreatedUserResponse;
     const { firstName, middleName, lastName } = created.data.employee;
     return {
+      id: created.data.id,
       username: created.data.userName,
       password: user.password,
       userRole: roleFromId(created.data.userRole.id),
       status: created.data.status ? 'Enabled' : 'Disabled',
       employeeName: [firstName, middleName, lastName].filter(Boolean).join(' '),
     };
+  });
+}
+
+export async function deleteEmployees(cookie: string, ids: number[]): Promise<void> {
+  if (ids.length === 0) return;
+  await api(cookie, async (context) => {
+    const response = await context.delete('/web/index.php/api/v2/pim/employees', {
+      data: { ids },
+    });
+    await readOk(response, 'deleteEmployees', [404]);
+  });
+}
+
+export async function deleteUsers(cookie: string, ids: number[]): Promise<void> {
+  if (ids.length === 0) return;
+  await api(cookie, async (context) => {
+    const response = await context.delete('/web/index.php/api/v2/admin/users', {
+      data: { ids },
+    });
+    await readOk(response, 'deleteUsers', [404]);
+  });
+}
+
+export async function userIdsByEmployee(cookie: string, empNumber: number): Promise<number[]> {
+  return api(cookie, async (context) => {
+    const response = await context.get('/web/index.php/api/v2/admin/users', {
+      params: { empNumber, limit: 50, offset: 0 },
+    });
+    const listed = JSON.parse(await readOk(response, 'userIdsByEmployee')) as UserListResponse;
+    return listed.data.map((user) => user.id);
   });
 }
 
@@ -103,8 +139,10 @@ async function api<T>(cookie: string, run: (context: APIRequestContext) => Promi
   }
 }
 
-async function readOk(response: APIResponse, label: string): Promise<string> {
+async function readOk(response: APIResponse, label: string, accept: number[] = []): Promise<string> {
   const body = await response.text();
-  if (!response.ok()) throw new Error(`${label} failed: ${response.status()} ${body}`);
+  if (!response.ok() && !accept.includes(response.status())) {
+    throw new Error(`${label} failed: ${response.status()} ${body}`);
+  }
   return body;
 }

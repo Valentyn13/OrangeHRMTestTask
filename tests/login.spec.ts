@@ -1,7 +1,8 @@
 import { credentialsFor } from '../config/env';
 import { roles } from '../utils/types';
 import { routes } from '../utils/routes';
-import { expect, test } from '../fixtures/test';
+import { test } from '../fixtures';
+import { expect } from '@playwright/test';
 
 test('Login page loaded and shows the login form', async ({page, loginPage }) => {
   await loginPage.open();

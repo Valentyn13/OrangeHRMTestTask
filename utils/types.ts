@@ -14,6 +14,7 @@ export type NewSystemUser = {
     status: UserStatus;
     username: string;
     password: string;
+    id?: number;
   };
 
 export type NewEmployee = {
