@@ -25,6 +25,40 @@ export type NewEmployee = {
     empNumber?: number;
   };
 
+export type NewVacancy = {
+  name: string;
+  jobTitleId: number;
+  employeeId: number;
+  numOfPositions: number | null;
+  description: string;
+  status: boolean;
+  isPublished: boolean;
+  id?: number;
+  jobTitle?: string;
+  hiringManager?: string;
+};
+
+export type NewCandidate = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  contactNumber: string | null;
+  keywords: string;
+  comment: string;
+  dateOfApplication: string;
+  consentToKeepData: boolean;
+  vacancyId?: number;
+  id?: number;
+  vacancy?: string;
+  jobTitle?: string;
+  hiringManager?: string;
+  status?: CandidateStatus;
+  method?: ApplicationMethod;
+  applicationDate?: string;
+};
+
 export const roles = ['admin', 'ess'] as const;
 export type Role = (typeof roles)[number];
 
@@ -57,4 +91,14 @@ export type CandidateFilters = {
 
 export type RoleOptions = {
   role: Role;
+};
+
+
+export type SearchableCandidate = NewCandidate & {
+  vacancy: string;
+  jobTitle: string;
+  hiringManager: string;
+  status: CandidateStatus;
+  method: ApplicationMethod;
+  applicationDate: string;
 };

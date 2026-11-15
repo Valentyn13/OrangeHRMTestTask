@@ -12,10 +12,9 @@ const authFile = (role: 'admin' | 'ess') =>
 
 export default defineConfig<RoleOptions>({
   testDir: './tests',
-  fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  fullyParallel: true,
+  retries: 0,
+  workers: 4,
   reporter: 'html',
   timeout: 90_000,
   expect: { timeout: 60_000 },
@@ -46,7 +45,7 @@ export default defineConfig<RoleOptions>({
         role: 'admin',
       },
     },
-    // ESS is paused for now. Uncomment to run the ess project again.
+    // ESS role disabled because of environment reset.
     // {
     //   name: 'ess',
     //   dependencies: ['setup'],
