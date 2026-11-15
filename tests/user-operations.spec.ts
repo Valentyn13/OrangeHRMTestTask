@@ -6,6 +6,7 @@ test('Create a system user for a new employee', async ({
   systemUsersPage,
   addUserPage,
   role,
+  page,
   createdEmployee,
 }) => {
   test.skip(role !== 'admin', 'ESS cannot open Admin');
@@ -16,6 +17,7 @@ test('Create a system user for a new employee', async ({
   await expect(systemUsersPage.page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
 
   await systemUsersPage.addUserButton.click();
+  await expect(page).toHaveURL(new RegExp(`${routes.saveSystemUser}$`));
 
   await addUserPage.create(user);
 
@@ -26,21 +28,22 @@ test('Create a system user for a new employee', async ({
 });
 
 test('Update a system user', async ({ page, systemUsersPage, editUserPage, createdUser }) => {
-  const username = `edit${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  const newUsername = `edit${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   console.log('Old username', createdUser.username);
-  console.log('New username', username);
+  console.log('New username', newUsername);
   await systemUsersPage.open();
   await systemUsersPage.searchByUsername(createdUser.username);
   await systemUsersPage.users.editButton(createdUser).click();
-  await expect(page).toHaveURL(/\/admin\/saveSystemUser\/\d+$/);
+  await expect(page).toHaveURL(new RegExp(`${routes.saveSystemUser}/\\d+$`));
 
-  await editUserPage.update({ username });
-
-  await systemUsersPage.searchByUsername(username);
+  await editUserPage.update({ username: newUsername });
+  await expect(page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
+  
+  await systemUsersPage.searchByUsername(newUsername);
 
   await expect(
     systemUsersPage.users.row({
-      username,
+      username: newUsername,
       userRole: createdUser.userRole,
       employeeName: createdUser.employeeName,
       status: createdUser.status,
