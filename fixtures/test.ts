@@ -1,6 +1,9 @@
 import { test as base, expect } from '@playwright/test';
 import { AddEmployeeForm } from '../pages/components/add-employee.form';
 import { AddUserPage } from '../pages/add-user.page';
+import { CandidatesPage } from '../pages/candidates.page';
+import { readAuthCookie } from '../config/env';
+import { createEmployee, createUser } from '../utils/api';
 import { disposableEmployee, disposableSystemUser } from '../utils/helpers';
 import { NewEmployee, NewSystemUser, RoleOptions } from '../utils/types';
 import { DashboardPage } from '../pages/dashboard.page';
@@ -19,12 +22,18 @@ type PageFixtures = {
   addUserPage: AddUserPage;
   editUserPage: EditUserPage;
   myInfoPage: MyInfoPage;
+  candidatesPage: CandidatesPage;
   createdEmployee: NewEmployee;
   createdUser: NewSystemUser;
+  orangehrmCookie: string;
 };
 
 export const test = base.extend<PageFixtures & RoleOptions>({
   role: ['admin', { option: true }],
+
+  orangehrmCookie: async ({ role }, use) => {
+    await use(readAuthCookie(role));
+  },
 
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
@@ -50,22 +59,24 @@ export const test = base.extend<PageFixtures & RoleOptions>({
   myInfoPage: async ({ page }, use) => {
     await use(new MyInfoPage(page));
   },
-  createdEmployee: async ({ role, employeeListPage, addEmployeeForm }, use, testInfo) => {
-    testInfo.skip(role !== 'admin', 'ESS cannot open PIM');
+  candidatesPage: async ({ page }, use) => {
+    await use(new CandidatesPage(page));
+  },
+  createdEmployee: async ({ role, orangehrmCookie }, use, testInfo) => {
+    testInfo.skip(role !== 'admin', 'ESS cannot create employees');
 
-    const employee = disposableEmployee();
-    await employeeListPage.open();
-    await employeeListPage.addButton.click();
-    await addEmployeeForm.create(employee);
+    const employee = await createEmployee(orangehrmCookie, disposableEmployee());
     await use(employee);
   },
-  createdUser: async ({ role, systemUsersPage, addUserPage, createdEmployee }, use, testInfo) => {
-    testInfo.skip(role !== 'admin', 'ESS cannot open Admin');
+  createdUser: async ({ role, orangehrmCookie, createdEmployee }, use, testInfo) => {
+    testInfo.skip(role !== 'admin', 'ESS cannot create users');
+    if (createdEmployee.empNumber == null) throw new Error('createdEmployee is missing empNumber');
 
-    const user = disposableSystemUser(createdEmployee.fullName);
-    await systemUsersPage.open();
-    await systemUsersPage.addUserButton.click();
-    await addUserPage.create(user);
+    const user = await createUser(
+      orangehrmCookie,
+      createdEmployee.empNumber,
+      disposableSystemUser(createdEmployee.fullName),
+    );
     await use(user);
   },
 });

@@ -7,4 +7,5 @@ export const routes = {
   saveSystemUser: '/web/index.php/admin/saveSystemUser',
   employeeList: '/web/index.php/pim/viewEmployeeList',
   addEmployee: '/web/index.php/pim/addEmployee',
+  candidates: '/web/index.php/recruitment/viewCandidates',
 } as const;

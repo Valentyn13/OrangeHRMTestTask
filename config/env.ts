@@ -25,6 +25,22 @@ export function authStatePath(role: Role): string {
   return path.join(process.cwd(), 'playwright', '.auth', `${role}.json`);
 }
 
+export function authCookiePath(role: Role): string {
+  return path.join(process.cwd(), 'playwright', '.auth', `${role}.cookie`);
+}
+
+export function saveAuthCookie(role: Role, value: string): void {
+  fs.writeFileSync(authCookiePath(role), value);
+}
+
+export function readAuthCookie(role: Role): string {
+  const cookie = fs.readFileSync(authCookiePath(role), 'utf8').trim();
+  if (!cookie) {
+    throw new Error(`Missing orangehrm cookie for ${role}. Run the setup project.`);
+  }
+  return cookie;
+}
+
 export function ensureAuthDir(): void {
   fs.mkdirSync(path.join(process.cwd(), 'playwright', '.auth'), { recursive: true });
 }
