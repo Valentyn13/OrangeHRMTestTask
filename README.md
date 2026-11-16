@@ -103,3 +103,7 @@ utils/
 - Employee create and search UI tests (`employeeListPage` and `addEmployeeForm`)
 - User update not only with username: role and status, and an assertion that the old username is gone.
 - Login still missing: forgot-password navigation, and a disabled user case.
+
+### Tasks
+
+- Canvas charts evaluation
