@@ -13,6 +13,7 @@ End-to-end tests for the public [OrangeHRM demo](https://opensource-demo.orangeh
 
 ```bash
 git clone <repo-url>
+npm ci
 npx playwright install
 cp .env.example .env
 ```
