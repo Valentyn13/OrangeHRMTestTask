@@ -1,6 +1,7 @@
-import { test as base } from '@playwright/test';
+import { test as base, type APIRequestContext } from '@playwright/test';
 import { readAuthCookie } from '../config/env';
 import {
+  createApiContext,
   createCandidate,
   createEmployee,
   createUser,
@@ -20,39 +21,53 @@ import type { Role } from '../utils/types';
 type TestSetupFixtures = {
   createdEmployee: NewEmployee;
   createdUser: NewSystemUser;
-  createdVacancies: NewVacancy[];
+  candidateCount: number;
   createdCandidates: NewCandidate[];
 };
 type WorkerSetupFixtures = {
   role: Role;
   orangehrmCookie: string;
+  apiContext: APIRequestContext;
+  vacancyCount: number;
+  createdVacancies: NewVacancy[];
 };
 
 export const testSetupFixture = base.extend<TestSetupFixtures, WorkerSetupFixtures>({
   role: ['admin', { option: true, scope: 'worker' }],
-
+  vacancyCount: [1, { option: true, scope: 'worker' }],
+  candidateCount: [1, { option: true }],
   orangehrmCookie: [async ({ role }, use) => {
     await use(readAuthCookie(role));
-  }, {scope: 'worker'}],
-  
-  createdEmployee: async ({ orangehrmCookie }, use) => {
+  }, { scope: 'worker' }],
+
+  apiContext: [async ({ orangehrmCookie }, use) => {
+    const context = await createApiContext(orangehrmCookie);
+    try {
+      await use(context);
+    } finally {
+      await context.dispose();
+    }
+  }, { scope: 'worker' }],
+
+
+  createdEmployee: async ({ apiContext }, use) => {
     //Setup
-    const employee = await createEmployee(orangehrmCookie, disposableEmployee());
+    const employee = await createEmployee(apiContext, disposableEmployee());
 
     await use(employee);
 
     //Teardown
     if (employee.empNumber == null) return;
-    const userIds = await userIdsByEmployee(orangehrmCookie, employee.empNumber);
-    await deleteUsers(orangehrmCookie, userIds);
-    await deleteEmployees(orangehrmCookie, [employee.empNumber]);
+    const userIds = await userIdsByEmployee(apiContext, employee.empNumber);
+    await deleteUsers(apiContext, userIds);
+    await deleteEmployees(apiContext, [employee.empNumber]);
   },
-  createdUser: async ({ orangehrmCookie, createdEmployee }, use) => {
+  createdUser: async ({ apiContext, createdEmployee }, use) => {
     if (createdEmployee.empNumber == null) throw new Error('createdEmployee is missing empNumber');
 
     //Setup
     const user = await createUser(
-      orangehrmCookie,
+      apiContext,
       createdEmployee.empNumber,
       disposableSystemUser(createdEmployee.fullName),
     );
@@ -60,33 +75,41 @@ export const testSetupFixture = base.extend<TestSetupFixtures, WorkerSetupFixtur
     await use(user);
 
     //Teardown
-    if (user.id != null) await deleteUsers(orangehrmCookie, [user.id]);
+    if (user.id != null) await deleteUsers(apiContext, [user.id]);
   },
-  createdVacancies: async ({ orangehrmCookie }, use) => {
-    const jobTitleId = await firstJobTitleId(orangehrmCookie);
-    const employeeId = await firstEmployeeNumber(orangehrmCookie);
+  createdVacancies: [async ({ apiContext, vacancyCount }, use) => {
+    const jobTitleId = await firstJobTitleId(apiContext);
+    const employeeId = await firstEmployeeNumber(apiContext);
 
     const vacancies: NewVacancy[] = [];
     try {
-      vacancies.push(await createVacancy(orangehrmCookie, disposableVacancy(jobTitleId, employeeId, 0)));
+      for (let index = 0; index < vacancyCount; index++) {
+        vacancies.push(await createVacancy(apiContext, disposableVacancy(jobTitleId, employeeId, index)));
+      }
 
       await use(vacancies);
     } finally {
       await deleteVacancies(
-        orangehrmCookie,
+        apiContext,
         vacancies.flatMap((vacancy) => (vacancy.id == null ? [] : [vacancy.id])),
       );
     }
-  },
-  createdCandidates: async ({ orangehrmCookie, createdVacancies }, use) => {
+  }, { scope: 'worker' }],
+  
+  createdCandidates: async ({ apiContext, createdVacancies, candidateCount }, use) => {
+    if (createdVacancies.length === 0) throw new Error('createdCandidates requires vacancyCount >= 1');
+
     const candidates: NewCandidate[] = [];
     try {
-      candidates.push(await createCandidate(orangehrmCookie, disposableCandidate(createdVacancies[0], 0)));
+      for (let index = 0; index < candidateCount; index++) {
+        const vacancy = createdVacancies[index % createdVacancies.length];
+        candidates.push(await createCandidate(apiContext, disposableCandidate(vacancy, index)));
+      }
 
       await use(candidates);
     } finally {
       await deleteCandidates(
-        orangehrmCookie,
+        apiContext,
         candidates.flatMap((candidate) => (candidate.id == null ? [] : [candidate.id])),
       );
     }

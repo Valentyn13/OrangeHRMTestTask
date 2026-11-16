@@ -32,12 +32,12 @@ npm run report           # open the last HTML report
 
 ### Project features
 
-1. Fully parallel run, 4 workers (`fullyParallel` in `playwright.config.ts`).
+1. Fully parallel run, 4 workers.
 2. Per-test API setup and teardown in fixtures (employee, user, vacancy, candidate).
 3. `auth.setup` writes browser `storageState` and the `orangehrm` cookie used by API calls.
 4. Page objects injected as Playwright fixtures.
 5. Parametrized fixtures and fixtures that use other fixtures.
-6. Playwright projects: `setup` → `admin` (depends on setup); `login` runs unauthenticated.
+6. Reuse login state for UI test and auth for API.
 
 ### Structure
 
@@ -51,8 +51,8 @@ config/
 fixtures/
   index.ts                    merged `test` — import this in specs
   page-object.fixture.ts       page object fixtures
-  tests-setup.fixture.ts      worker cookie + createdEmployee / createdUser /
-                              createdVacancies / createdCandidates (API create/delete) fixtures
+  tests-setup.fixture.ts      worker: cookie, apiContext, createdVacancies (vacancyCount)
+                              test: createdEmployee, createdUser, createdCandidates (candidateCount)
 
 pages/
   login.page.ts               
@@ -88,7 +88,7 @@ utils/
 .github/workflows/playwright.yml   CI: npm ci, install browsers, copy .env.example, run tests
 ```
 
-`playwright/.auth/` is created by `auth.setup` and gitignored. Specs import `test` from `fixtures/index.ts`, which merges page-object fixtures with the API setup fixtures. A spec that asks for `createdUser` also gets `createdEmployee` (the user is attached to that employee); `createdCandidates` depends on `createdVacancies`. Teardown deletes what that test created.
+`playwright/.auth/` is created by `auth.setup` and gitignored. Specs import `test` from `fixtures/index.ts`, which merges page-object fixtures with the API setup fixtures. A spec that asks for `createdUser` also gets `createdEmployee` (the user is attached to that employee). `apiContext` is created once per worker from `orangehrmCookie` and reused for every API call. `createdVacancies` is worker-scoped (`vacancyCount`, default 1); `createdCandidates` is per test (`candidateCount`, default 1) and is attached to those vacancies. Candidate teardown runs after each test. Vacancy teardown runs when the worker exits. Override either count with `test.use({ vacancyCount: 2, candidateCount: 3 })`.
 
 # IMPROVES FOR LATER
 
@@ -100,9 +100,7 @@ utils/
 
 ### Speed and signal
 
-- `utils/api.ts` opens a new `APIRequestContext` on every call. One worker-scoped context next to `orangehrmCookie` is enough.
-- Every candidate spec pays for a new vacancy and then reads `createdCandidates[0]`. Make the vacancy worker-scoped and keep the candidate per test. The array return type already implies a count option if a spec needs more than one.
-- `tests/candidates.spec.ts` asserts with `expect(await recordCount())`, which does not retry. Use `expect.poll` or a locator assertion. The nine filter tests are the same open → filter → count shape and can be a `test.each` matrix. The `180_000` describe timeout should come down after the vacancy is no longer per test.
+- `tests/candidates.spec.ts` asserts with `expect(await recordCount())`, which does not retry. Use `expect.poll` or a locator assertion. The nine filter tests are the same open → filter → count shape and can be a `test.each` matrix. The `180_000` describe timeout can come down now that the vacancy is created once per worker.
 
 ### Coverage
 
