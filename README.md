@@ -2,6 +2,8 @@
 
 End-to-end tests for the public [OrangeHRM demo](https://opensource-demo.orangehrmlive.com).
 
+## Note:
+```The CI/CD do not runs because I somehow owed GitHub some money and they want my billing information```
 ## Prerequisites
 
 - Node.js LTS
