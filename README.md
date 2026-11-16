@@ -98,10 +98,6 @@ utils/
 - `createdVacancies` uses `firstEmployeeNumber()` as the hiring manager. A parallel worker can delete that employee. Create a dedicated employee inside the vacancy fixture and delete it with the vacancy.
 - `tests/my-info-attachments.spec.ts` uploads onto the shared admin profile. Drive it through `createdEmployee` so a failed delete does not leave files on the demo admin, and so a second attachment spec can run in parallel.
 
-### Speed and signal
-
-- `tests/candidates.spec.ts` asserts with `expect(await recordCount())`, which does not retry. Use `expect.poll` or a locator assertion. The nine filter tests are the same open → filter → count shape and can be a `test.each` matrix. The `180_000` describe timeout can come down now that the vacancy is created once per worker.
-
 ### Coverage
 
 - Employee create and search UI tests (`employeeListPage` and `addEmployeeForm`)
