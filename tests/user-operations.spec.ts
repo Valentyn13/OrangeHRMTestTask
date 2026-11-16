@@ -28,8 +28,7 @@ test('Create a system user for a new employee', async ({
 
 test('Update a system user', async ({ page, systemUsersPage, editUserPage, createdUser }) => {
   const newUsername = `edit${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-  console.log('Old username', createdUser.username);
-  console.log('New username', newUsername);
+
   await systemUsersPage.open();
   await systemUsersPage.searchByUsername(createdUser.username);
   await systemUsersPage.users.editButton(createdUser).click();

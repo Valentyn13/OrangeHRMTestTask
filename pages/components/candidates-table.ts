@@ -53,10 +53,8 @@ export class CandidatesTable {
 
   async expectColumn(column: CandidateColumn, value: string): Promise<void> {
     const values = await this.columnTexts(column);
-    console.log('values', values);
     expect(values.length).toBeGreaterThan(0);
     for (const cell of values) {
-      console.log('cell', cell);
       expect(cell).toBe(value);
     }
   }

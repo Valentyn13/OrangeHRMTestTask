@@ -24,3 +24,86 @@ npm run test:login       # login specs only
 npm run test:admin       # admin specs (runs auth setup first)
 npm run report           # open the last HTML report
 ```
+
+
+## Overview
+
+### Project features
+
+1. Fully parallel run, 4 workers (`fullyParallel` in `playwright.config.ts`).
+2. Per-test API setup and teardown in fixtures (employee, user, vacancy, candidate).
+3. `auth.setup` writes browser `storageState` and the `orangehrm` cookie used by API calls.
+4. Page objects injected as Playwright fixtures.
+5. Parametrized fixtures and fixtures that use other fixtures.
+6. Playwright projects: `setup` → `admin` (depends on setup); `login` runs unauthenticated.
+
+### Structure
+
+```
+playwright.config.ts          projects, timeouts, baseURL, storageState
+.env.example                  BASE_URL and role credentials (copy to .env)
+
+config/
+  env.ts                      .env credential resolve, auth file paths, cookie read/write
+
+fixtures/
+  index.ts                    merged `test` — import this in specs
+  page-object.fixture.ts       page object fixtures
+  tests-setup.fixture.ts      worker cookie + createdEmployee / createdUser /
+                              createdVacancies / createdCandidates (API create/delete) fixtures
+
+pages/
+  login.page.ts               
+  dashboard.page.ts
+  my-info.page.ts             PIM My Info, including attachments
+  employee-list.page.ts
+  system-users.page.ts        Admin → User Management list
+  add-user.page.ts
+  edit-user.page.ts
+  candidates.page.ts          Recruitment → Candidates
+  components/                 Widgets owned by a page, not full screens
+    add-employee.form.ts
+    system-users-search-form.ts
+    system-users-table.ts
+    candidates-search-form.ts
+    candidates-table.ts
+
+tests/
+  auth.setup.ts               login per role; writes playwright/.auth/<role>.json and .cookie
+  login.spec.ts               project: login (no storageState)
+  dashboard.spec.ts           project: admin
+  user-operations.spec.ts
+  my-info-attachments.spec.ts
+  candidates.spec.ts
+
+utils/
+  api.ts                      OrangeHRM API: employees, users, vacancies, candidates
+  helpers.ts                  Disposable* factories (unique names per run)
+  types.ts                    Types, Role, candidate statuses
+  routes.ts                   UI paths shared by pages and auth.setup
+  assets/test_image.png       Attachment used by my-info specs
+
+.github/workflows/playwright.yml   CI: npm ci, install browsers, copy .env.example, run tests
+```
+
+`playwright/.auth/` is created by `auth.setup` and gitignored. Specs import `test` from `fixtures/index.ts`, which merges page-object fixtures with the API setup fixtures. A spec that asks for `createdUser` also gets `createdEmployee` (the user is attached to that employee); `createdCandidates` depends on `createdVacancies`. Teardown deletes what that test created.
+
+# IMPROVES FOR LATER
+
+### Isolation on the shared demo
+
+- ESS user role is not used. The demo DB resets the data, so `ESS_USERNAME` in `.env.example` not used, this can be improved and test with this role can be added.
+- `createdVacancies` uses `firstEmployeeNumber()` as the hiring manager. A parallel worker can delete that employee. Create a dedicated employee inside the vacancy fixture and delete it with the vacancy.
+- `tests/my-info-attachments.spec.ts` uploads onto the shared admin profile. Drive it through `createdEmployee` so a failed delete does not leave files on the demo admin, and so a second attachment spec can run in parallel.
+
+### Speed and signal
+
+- `utils/api.ts` opens a new `APIRequestContext` on every call. One worker-scoped context next to `orangehrmCookie` is enough.
+- Every candidate spec pays for a new vacancy and then reads `createdCandidates[0]`. Make the vacancy worker-scoped and keep the candidate per test. The array return type already implies a count option if a spec needs more than one.
+- `tests/candidates.spec.ts` asserts with `expect(await recordCount())`, which does not retry. Use `expect.poll` or a locator assertion. The nine filter tests are the same open → filter → count shape and can be a `test.each` matrix. The `180_000` describe timeout should come down after the vacancy is no longer per test.
+
+### Coverage
+
+- Employee create and search UI tests (`employeeListPage` and `addEmployeeForm`)
+- User update not only with username: role and status, and an assertion that the old username is gone.
+- Login still missing: forgot-password navigation, and a disabled user case.
