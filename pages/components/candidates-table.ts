@@ -21,7 +21,7 @@ export class CandidatesTable {
 
   constructor(private readonly page: Page) {
     this.table = page.getByRole('table');
-    this.rows = page.locator('.oxd-table-body').getByRole('row');
+    this.rows = this.table.locator('.oxd-table-body').getByRole('row');
   }
 
   header(name: string): Locator {

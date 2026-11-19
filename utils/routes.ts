@@ -8,4 +8,6 @@ export const routes = {
   employeeList: '/web/index.php/pim/viewEmployeeList',
   addEmployee: '/web/index.php/pim/addEmployee',
   candidates: '/web/index.php/recruitment/viewCandidates',
+  employeeDetails: (empNumber: number) =>
+    `/web/index.php/pim/viewPersonalDetails/empNumber/${empNumber}`,
 } as const;

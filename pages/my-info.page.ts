@@ -19,7 +19,7 @@ export class MyInfoPage {
   constructor(page: Page) {
     this.page = page;
     this.section = page.locator('.orangehrm-attachment');
-    this.addButton = this.page.getByRole('button', { name: 'Add' });
+    this.addButton = this.section.getByRole('button', { name: 'Add' });
     this.table = this.section.getByRole('table');
     this.fileInput = this.section.locator('input[type="file"]');
     this.commentInput = this.section.getByPlaceholder('Type comment here');
@@ -37,6 +37,10 @@ export class MyInfoPage {
   async openFromMenu(): Promise<void> {
     await this.page.goto(routes.dashboard);
     await this.page.locator(`a.oxd-main-menu-item[href="${routes.myInfo}"]`).click();
+  }
+
+  async openEmployee(empNumber: number): Promise<void> {
+    await this.page.goto(routes.employeeDetails(empNumber));
   }
 
   async uploadFileAndComment(filePath: string, comment: string): Promise<void> {

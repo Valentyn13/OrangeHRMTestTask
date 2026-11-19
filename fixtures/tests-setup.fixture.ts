@@ -10,26 +10,24 @@ import {
   deleteEmployees,
   deleteVacancies,
   deleteUsers,
-  firstEmployeeNumber,
   firstJobTitleId,
   userIdsByEmployee,
 } from '../utils/api';
 import { disposableCandidate, disposableEmployee, disposableSystemUser, disposableVacancy } from '../utils/helpers';
-import { NewCandidate, NewEmployee, NewSystemUser, NewVacancy } from '../utils/types';
-import type { Role } from '../utils/types';
+import type { Candidate, Employee, Role, User, Vacancy } from '../utils/types';
 
 type TestSetupFixtures = {
-  createdEmployee: NewEmployee;
-  createdUser: NewSystemUser;
+  createdEmployee: Employee;
+  createdUser: User;
   candidateCount: number;
-  createdCandidates: NewCandidate[];
+  createdCandidates: Candidate[];
 };
 type WorkerSetupFixtures = {
   role: Role;
   orangehrmCookie: string;
   apiContext: APIRequestContext;
   vacancyCount: number;
-  createdVacancies: NewVacancy[];
+  createdVacancies: Vacancy[];
 };
 
 export const testSetupFixture = base.extend<TestSetupFixtures, WorkerSetupFixtures>({
@@ -49,69 +47,58 @@ export const testSetupFixture = base.extend<TestSetupFixtures, WorkerSetupFixtur
     }
   }, { scope: 'worker' }],
 
-
   createdEmployee: async ({ apiContext }, use) => {
-    //Setup
     const employee = await createEmployee(apiContext, disposableEmployee());
-
-    await use(employee);
-
-    //Teardown
-    if (employee.empNumber == null) return;
-    const userIds = await userIdsByEmployee(apiContext, employee.empNumber);
-    await deleteUsers(apiContext, userIds);
-    await deleteEmployees(apiContext, [employee.empNumber]);
+    try {
+      await use(employee);
+    } finally {
+      const userIds = await userIdsByEmployee(apiContext, employee.empNumber).catch(() => []);
+      await deleteUsers(apiContext, userIds);
+      await deleteEmployees(apiContext, [employee.empNumber]);
+    }
   },
   createdUser: async ({ apiContext, createdEmployee }, use) => {
-    if (createdEmployee.empNumber == null) throw new Error('createdEmployee is missing empNumber');
-
-    //Setup
     const user = await createUser(
       apiContext,
       createdEmployee.empNumber,
       disposableSystemUser(createdEmployee.fullName),
     );
-
-    await use(user);
-
-    //Teardown
-    if (user.id != null) await deleteUsers(apiContext, [user.id]);
+    try {
+      await use(user);
+    } finally {
+      await deleteUsers(apiContext, [user.id]);
+    }
   },
   createdVacancies: [async ({ apiContext, vacancyCount }, use) => {
     const jobTitleId = await firstJobTitleId(apiContext);
-    const employeeId = await firstEmployeeNumber(apiContext);
-
-    const vacancies: NewVacancy[] = [];
+    const manager = await createEmployee(apiContext, disposableEmployee());
+    const vacancies: Vacancy[] = [];
     try {
       for (let index = 0; index < vacancyCount; index++) {
-        vacancies.push(await createVacancy(apiContext, disposableVacancy(jobTitleId, employeeId, index)));
+        vacancies.push(await createVacancy(
+          apiContext,
+          disposableVacancy(jobTitleId, manager.empNumber, index),
+        ));
       }
-
       await use(vacancies);
     } finally {
-      await deleteVacancies(
-        apiContext,
-        vacancies.flatMap((vacancy) => (vacancy.id == null ? [] : [vacancy.id])),
-      );
+      await deleteVacancies(apiContext, vacancies.map((vacancy) => vacancy.id));
+      await deleteEmployees(apiContext, [manager.empNumber]);
     }
   }, { scope: 'worker' }],
-  
+
   createdCandidates: async ({ apiContext, createdVacancies, candidateCount }, use) => {
     if (createdVacancies.length === 0) throw new Error('createdCandidates requires vacancyCount >= 1');
 
-    const candidates: NewCandidate[] = [];
+    const candidates: Candidate[] = [];
     try {
       for (let index = 0; index < candidateCount; index++) {
         const vacancy = createdVacancies[index % createdVacancies.length];
         candidates.push(await createCandidate(apiContext, disposableCandidate(vacancy, index)));
       }
-
       await use(candidates);
     } finally {
-      await deleteCandidates(
-        apiContext,
-        candidates.flatMap((candidate) => (candidate.id == null ? [] : [candidate.id])),
-      );
+      await deleteCandidates(apiContext, candidates.map((candidate) => candidate.id));
     }
   },
 });

@@ -8,55 +8,43 @@ export type SystemUser = {
   status: UserStatus;
 };
 
-export type NewSystemUser = {
-    userRole: UserRole;
-    employeeName: string;
-    status: UserStatus;
-    username: string;
-    password: string;
-    id?: number;
-  };
-
-export type NewEmployee = {
-    firstName: string;
-    lastName: string;
-    fullName: string;
-    employeeId: string;
-    empNumber?: number;
-  };
-
-export type NewVacancy = {
-  name: string;
-  jobTitleId: number;
-  employeeId: number;
-  numOfPositions: number | null;
-  description: string;
-  status: boolean;
-  isPublished: boolean;
-  id?: number;
-  jobTitle?: string;
-  hiringManager?: string;
+export type UserInput = {
+  userRole: UserRole;
+  employeeName: string;
+  status: UserStatus;
+  username: string;
+  password: string;
 };
 
-export type NewCandidate = {
+export type User = UserInput & {
+  id: number;
+};
+
+export type EmployeeInput = {
   firstName: string;
-  middleName: string;
   lastName: string;
+  employeeId: string;
+};
+
+export type Employee = EmployeeInput & {
+  empNumber: number;
   fullName: string;
-  email: string;
-  contactNumber: string | null;
-  keywords: string;
-  comment: string;
-  dateOfApplication: string;
-  consentToKeepData: boolean;
-  vacancyId?: number;
-  id?: number;
-  vacancy?: string;
-  jobTitle?: string;
-  hiringManager?: string;
-  status?: CandidateStatus;
-  method?: ApplicationMethod;
-  applicationDate?: string;
+};
+
+export type VacancyInput = {
+  name: string;
+  jobTitleId: number;
+  hiringManagerEmpNumber: number;
+  numOfPositions: number | null;
+  description: string;
+  isOpen: boolean;
+  isPublished: boolean;
+};
+
+export type Vacancy = VacancyInput & {
+  id: number;
+  jobTitle: string;
+  hiringManager: string;
 };
 
 export const roles = ['admin', 'ess'] as const;
@@ -77,6 +65,30 @@ export type CandidateStatus = (typeof candidateStatuses)[number];
 
 export type ApplicationMethod = 'Manual' | 'Online';
 
+export type CandidateInput = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  contactNumber: string | null;
+  keywords: string;
+  comment: string;
+  dateOfApplication: string;
+  consentToKeepData: boolean;
+  vacancyId: number;
+  vacancy: string;
+  jobTitle: string;
+  hiringManager: string;
+  status: CandidateStatus;
+  method: ApplicationMethod;
+};
+
+export type Candidate = CandidateInput & {
+  id: number;
+  applicationDate: string;
+};
+
 export type CandidateFilters = {
   jobTitle?: string;
   vacancy?: string;
@@ -93,12 +105,4 @@ export type RoleOptions = {
   role: Role;
 };
 
-
-export type SearchableCandidate = NewCandidate & {
-  vacancy: string;
-  jobTitle: string;
-  hiringManager: string;
-  status: CandidateStatus;
-  method: ApplicationMethod;
-  applicationDate: string;
-};
+export type SearchableCandidate = Candidate;

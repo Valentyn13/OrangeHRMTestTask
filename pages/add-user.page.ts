@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { routes } from '../utils/routes';
-import type { NewSystemUser } from '../utils/types';
+import type { UserInput } from '../utils/types';
 
 export class AddUserPage {
   readonly form: Locator;
@@ -23,7 +23,7 @@ export class AddUserPage {
     this.saveButton = this.form.getByRole('button', { name: 'Save' });
   }
 
-  async create(user: NewSystemUser): Promise<void> {
+  async create(user: UserInput): Promise<void> {
     await this.select(this.userRole, user.userRole);
     await this.selectEmployee(user.employeeName);
     await this.select(this.status, user.status);

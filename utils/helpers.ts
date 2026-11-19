@@ -1,11 +1,11 @@
-import type { NewCandidate, NewEmployee, NewSystemUser, NewVacancy, SearchableCandidate } from "./types";
+import type { Candidate, CandidateInput, EmployeeInput, SearchableCandidate, UserInput, Vacancy, VacancyInput } from "./types";
 const letters = 'abcdefghijklmnopqrstuvwxyz';
 
 function randomLetters(length: number): string {
   return Array.from({ length }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
 }
 
-export function disposableEmployee(): NewEmployee {
+export function disposableEmployee(): EmployeeInput {
   const firstName = `Emp${Date.now().toString(36).replace(/\d/g, (digit) => letters[Number(digit)])}${randomLetters(3)}`;
   const lastName = `Ln${randomLetters(8)}`;
   const employeeId = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`.slice(-10);
@@ -13,30 +13,24 @@ export function disposableEmployee(): NewEmployee {
   return {
     firstName,
     lastName,
-    fullName: `${firstName} ${lastName}`,
     employeeId,
   };
 }
 
-
-export function disposableVacancy(jobTitleId: number, employeeId: number, index: number): NewVacancy {
+export function disposableVacancy(jobTitleId: number, hiringManagerEmpNumber: number, index: number): VacancyInput {
   const name = `Vac${index}${Date.now().toString(36).replace(/\d/g, (digit) => letters[Number(digit)])}${randomLetters(4)}`;
   return {
     name,
     jobTitleId,
-    employeeId,
+    hiringManagerEmpNumber,
     numOfPositions: null,
     description: name,
-    status: true,
+    isOpen: true,
     isPublished: true,
   };
 }
 
-export function disposableCandidate(vacancy: NewVacancy, index: number): NewCandidate {
-  if (vacancy.id == null || vacancy.jobTitle == null || vacancy.hiringManager == null) {
-    throw new Error('vacancy is missing id, job title, or hiring manager');
-  }
-
+export function disposableCandidate(vacancy: Vacancy, index: number): CandidateInput {
   const stamp = Date.now().toString(36).replace(/\d/g, (digit) => letters[Number(digit)]);
   const firstName = `Can${index}${stamp}`.slice(0, 30);
   const middleName = 'M';
@@ -68,7 +62,7 @@ export function disposableCandidate(vacancy: NewVacancy, index: number): NewCand
   };
 }
 
-export function disposableSystemUser(employeeName: string): NewSystemUser {
+export function disposableSystemUser(employeeName: string): UserInput {
   return {
     userRole: 'ESS',
     employeeName,
@@ -87,10 +81,10 @@ export function shiftApplicationDate(applicationDate: string, days: number): str
   return `${date.getUTCFullYear()}-${shiftedDay}-${shiftedMonth}`;
 }
 
-export function searchable(candidate: NewCandidate): SearchableCandidate {
+export function searchable(candidate: Candidate): SearchableCandidate {
   const { vacancy, jobTitle, hiringManager, status, method, applicationDate } = candidate;
   if (!vacancy || !jobTitle || !hiringManager || !status || !method || !applicationDate) {
     throw new Error(`created candidate ${candidate.fullName} is missing search fields`);
   }
-  return { ...candidate, vacancy, jobTitle, hiringManager, status, method, applicationDate };
+  return candidate;
 }

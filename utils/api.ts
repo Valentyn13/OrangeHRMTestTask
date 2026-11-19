@@ -1,15 +1,18 @@
 import { request, type APIRequestContext, type APIResponse } from '@playwright/test';
+import { baseUrl } from '../config/env';
 import {
   candidateStatuses,
+  type Candidate,
+  type CandidateInput,
   type CandidateStatus,
-  type NewCandidate,
-  type NewEmployee,
-  type NewSystemUser,
-  type NewVacancy,
+  type Employee,
+  type EmployeeInput,
+  type User,
+  type UserInput,
   type UserRole,
+  type Vacancy,
+  type VacancyInput,
 } from './types';
-
-const baseURL = process.env.BASE_URL ?? 'https://opensource-demo.orangehrmlive.com';
 
 const userRoleIds: Record<UserRole, number> = {
   Admin: 1,
@@ -86,7 +89,7 @@ type CreatedCandidateResponse = {
 
 export function createApiContext(cookie: string): Promise<APIRequestContext> {
   return request.newContext({
-    baseURL,
+    baseURL: baseUrl(),
     extraHTTPHeaders: {
       Accept: 'application/json',
       Cookie: `orangehrm=${cookie}`,
@@ -94,7 +97,7 @@ export function createApiContext(cookie: string): Promise<APIRequestContext> {
   });
 }
 
-export async function createEmployee(api: APIRequestContext, employee: NewEmployee): Promise<NewEmployee> {
+export async function createEmployee(api: APIRequestContext, employee: EmployeeInput): Promise<Employee> {
   const response = await api.post('/web/index.php/api/v2/pim/employees', {
     data: {
       empPicture: null,
@@ -104,7 +107,7 @@ export async function createEmployee(api: APIRequestContext, employee: NewEmploy
       lastName: employee.lastName,
     },
   });
-  const created = JSON.parse(await readOk(response, 'createEmployee')) as CreatedEmployeeResponse;
+  const created = readJson<CreatedEmployeeResponse>(await readOk(response, 'createEmployee'), 'createEmployee');
   return {
     empNumber: created.data.empNumber,
     firstName: created.data.firstName,
@@ -117,8 +120,8 @@ export async function createEmployee(api: APIRequestContext, employee: NewEmploy
 export async function createUser(
   api: APIRequestContext,
   empNumber: number,
-  user: NewSystemUser,
-): Promise<NewSystemUser> {
+  user: UserInput,
+): Promise<User> {
   const response = await api.post('/web/index.php/api/v2/admin/users', {
     data: {
       empNumber,
@@ -128,7 +131,7 @@ export async function createUser(
       userRoleId: userRoleIds[user.userRole],
     },
   });
-  const created = JSON.parse(await readOk(response, 'createUser')) as CreatedUserResponse;
+  const created = readJson<CreatedUserResponse>(await readOk(response, 'createUser'), 'createUser');
   const { firstName, middleName, lastName } = created.data.employee;
   return {
     id: created.data.id,
@@ -164,29 +167,29 @@ export async function deleteUsers(api: APIRequestContext, ids: number[]): Promis
   await readOk(response, 'deleteUsers', [404]);
 }
 
-export async function createVacancy(api: APIRequestContext, vacancy: NewVacancy): Promise<NewVacancy> {
+export async function createVacancy(api: APIRequestContext, vacancy: VacancyInput): Promise<Vacancy> {
   const response = await api.post('/web/index.php/api/v2/recruitment/vacancies', {
     data: {
       name: vacancy.name,
       jobTitleId: vacancy.jobTitleId,
-      employeeId: vacancy.employeeId,
+      employeeId: vacancy.hiringManagerEmpNumber,
       numOfPositions: vacancy.numOfPositions,
       description: vacancy.description,
-      status: vacancy.status,
+      status: vacancy.isOpen,
       isPublished: vacancy.isPublished,
     },
   });
-  const created = JSON.parse(await readOk(response, 'createVacancy')) as CreatedVacancyResponse;
+  const created = readJson<CreatedVacancyResponse>(await readOk(response, 'createVacancy'), 'createVacancy');
   return {
     id: created.data.id,
     name: created.data.name,
     jobTitleId: created.data.jobTitle.id,
+    hiringManagerEmpNumber: created.data.hiringManager.id,
     jobTitle: created.data.jobTitle.title,
-    employeeId: created.data.hiringManager.id,
     hiringManager: personName(created.data.hiringManager),
     numOfPositions: created.data.numOfPositions,
     description: created.data.description,
-    status: created.data.status,
+    isOpen: created.data.status,
     isPublished: created.data.isPublished,
   };
 }
@@ -195,31 +198,17 @@ type IdListResponse = {
   data: { id: number }[];
 };
 
-type EmployeeListResponse = {
-  data: { empNumber: number }[];
-};
-
 export async function firstJobTitleId(api: APIRequestContext): Promise<number> {
   const response = await api.get('/web/index.php/api/v2/admin/job-titles', {
     params: { limit: 1, offset: 0 },
   });
-  const listed = JSON.parse(await readOk(response, 'firstJobTitleId')) as IdListResponse;
+  const listed = readJson<IdListResponse>(await readOk(response, 'firstJobTitleId'), 'firstJobTitleId');
   const id = listed.data[0]?.id;
   if (id == null) throw new Error('firstJobTitleId failed: no job titles');
   return id;
 }
 
-export async function firstEmployeeNumber(api: APIRequestContext): Promise<number> {
-  const response = await api.get('/web/index.php/api/v2/pim/employees', {
-    params: { limit: 1, offset: 0, includeEmployees: 'onlyCurrent' },
-  });
-  const listed = JSON.parse(await readOk(response, 'firstEmployeeNumber')) as EmployeeListResponse;
-  const empNumber = listed.data[0]?.empNumber;
-  if (empNumber == null) throw new Error('firstEmployeeNumber failed: no current employees');
-  return empNumber;
-}
-
-export async function createCandidate(api: APIRequestContext, candidate: NewCandidate): Promise<NewCandidate> {
+export async function createCandidate(api: APIRequestContext, candidate: CandidateInput): Promise<Candidate> {
   const response = await api.post('/web/index.php/api/v2/recruitment/candidates', {
     params: { model: 'list' },
     data: {
@@ -235,7 +224,7 @@ export async function createCandidate(api: APIRequestContext, candidate: NewCand
       vacancyId: candidate.vacancyId,
     },
   });
-  const created = JSON.parse(await readOk(response, 'createCandidate')) as CreatedCandidateResponse;
+  const created = readJson<CreatedCandidateResponse>(await readOk(response, 'createCandidate'), 'createCandidate');
   const fullName = [created.data.firstName, created.data.middleName, created.data.lastName]
     .filter(Boolean)
     .join(' ');
@@ -275,7 +264,7 @@ export async function userIdsByEmployee(api: APIRequestContext, empNumber: numbe
   const response = await api.get('/web/index.php/api/v2/admin/users', {
     params: { empNumber, limit: 50, offset: 0 },
   });
-  const listed = JSON.parse(await readOk(response, 'userIdsByEmployee')) as UserListResponse;
+  const listed = readJson<UserListResponse>(await readOk(response, 'userIdsByEmployee'), 'userIdsByEmployee');
   return listed.data.map((user) => user.id);
 }
 
@@ -300,6 +289,14 @@ function roleFromId(id: number): UserRole {
   const role = (Object.entries(userRoleIds) as [UserRole, number][]).find(([, roleId]) => roleId === id);
   if (!role) throw new Error(`Unknown userRoleId ${id}`);
   return role[0];
+}
+
+function readJson<T>(body: string, label: string): T {
+  try {
+    return JSON.parse(body) as T;
+  } catch {
+    throw new Error(`${label} returned non-JSON: ${body.slice(0, 500)}`);
+  }
 }
 
 async function readOk(response: APIResponse, label: string, accept: number[] = []): Promise<string> {

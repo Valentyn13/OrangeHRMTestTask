@@ -16,7 +16,7 @@ export class CandidatesPage {
     this.page = page;
     this.pageTitle = page.getByRole('heading', { name: 'Candidates' });
     this.addButton = page.locator('.orangehrm-header-container').getByRole('button', { name: 'Add' });
-    this.recordsFound = page.locator('.orangehrm-horizontal-padding .oxd-text--span');
+    this.recordsFound = page.locator('.orangehrm-horizontal-padding').getByText(/No Records Found|\(\d+\) Records? Found/);
     this.searchInput = new CandidatesSearchForm(page);
     this.candidatesTable = new CandidatesTable(page);
   }
@@ -30,12 +30,15 @@ export class CandidatesPage {
     );
     await this.page.goto(routes.candidates);
     await listed;
+    await expect(this.pageTitle).toBeVisible();
   }
 
   async recordCount(): Promise<number> {
     const text = (await this.recordsFound.innerText()).trim();
+    if (text === 'No Records Found') return 0;
     const match = text.match(/\((\d+)\)/);
-    return match ? Number(match[1]) : 0;
+    if (!match) throw new Error(`Unexpected records label: ${JSON.stringify(text)}`);
+    return Number(match[1]);
   }
 
   async applyFilters(filters: CandidateFilters): Promise<void> {

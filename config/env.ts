@@ -2,12 +2,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Role } from '../utils/types';
 
-
+const root = path.resolve(__dirname, '..');
 
 const credentialKeys = {
   admin: { username: 'ADMIN_USERNAME', password: 'ADMIN_PASSWORD' },
   ess: { username: 'ESS_USERNAME', password: 'ESS_PASSWORD' },
 } as const;
+
+export function baseUrl(): string {
+  const url = process.env.BASE_URL;
+  if (!url) throw new Error('Missing BASE_URL. Copy .env.example to .env.');
+  return url;
+}
 
 export function credentialsFor(role: Role): { username: string; password: string } {
   const keys = credentialKeys[role];
@@ -22,11 +28,11 @@ export function credentialsFor(role: Role): { username: string; password: string
 }
 
 export function authStatePath(role: Role): string {
-  return path.join(process.cwd(), 'playwright', '.auth', `${role}.json`);
+  return path.join(root, 'playwright', '.auth', `${role}.json`);
 }
 
 export function authCookiePath(role: Role): string {
-  return path.join(process.cwd(), 'playwright', '.auth', `${role}.cookie`);
+  return path.join(root, 'playwright', '.auth', `${role}.cookie`);
 }
 
 export function saveAuthCookie(role: Role, value: string): void {
@@ -42,5 +48,5 @@ export function readAuthCookie(role: Role): string {
 }
 
 export function ensureAuthDir(): void {
-  fs.mkdirSync(path.join(process.cwd(), 'playwright', '.auth'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'playwright', '.auth'), { recursive: true });
 }

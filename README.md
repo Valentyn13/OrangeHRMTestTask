@@ -2,8 +2,8 @@
 
 End-to-end tests for the public [OrangeHRM demo](https://opensource-demo.orangehrmlive.com).
 
-## Note:
-```The CI/CD do not runs because I somehow owed GitHub some money and they want my billing information```
+CI is disabled until GitHub billing is fixed.
+
 ## Prerequisites
 
 - Node.js LTS
@@ -89,15 +89,13 @@ utils/
 .github/workflows/playwright.yml   CI: npm ci, install browsers, copy .env.example, run tests
 ```
 
-`playwright/.auth/` is created by `auth.setup` and gitignored. Specs import `test` from `fixtures/index.ts`, which merges page-object fixtures with the API setup fixtures. A spec that asks for `createdUser` also gets `createdEmployee` (the user is attached to that employee). `apiContext` is created once per worker from `orangehrmCookie` and reused for every API call. `createdVacancies` is worker-scoped (`vacancyCount`, default 1); `createdCandidates` is per test (`candidateCount`, default 1) and is attached to those vacancies. Candidate teardown runs after each test. Vacancy teardown runs when the worker exits. Override either count with `test.use({ vacancyCount: 2, candidateCount: 3 })`.
+`playwright/.auth/` is created by `auth.setup` and gitignored. Specs import `test` from `fixtures/index.ts`, which merges page-object fixtures with the API setup fixtures. A spec that asks for `createdUser` also gets `createdEmployee` (the user is attached to that employee). `apiContext` is created once per worker from `orangehrmCookie` and reused for every API call. `createdVacancies` is worker-scoped (`vacancyCount`, default 1); `createdCandidates` is per test (`candidateCount`, default 1) and is attached to those vacancies. Candidate teardown runs after each test. Vacancy teardown runs when the worker exits. `vacancyCount` is worker-scoped: set it once per file with a top-level `test.use`, or in the project config. Two files that share a worker cannot set different values. `candidateCount` is per test: `test.use({ candidateCount: 3 })`.
 
 # IMPROVES FOR LATER
 
 ### Isolation on the shared demo
 
 - ESS user role is not used. The demo DB resets the data, so `ESS_USERNAME` in `.env.example` not used, this can be improved and test with this role can be added.
-- `createdVacancies` uses `firstEmployeeNumber()` as the hiring manager. A parallel worker can delete that employee. Create a dedicated employee inside the vacancy fixture and delete it with the vacancy.
-- `tests/my-info-attachments.spec.ts` uploads onto the shared admin profile. Drive it through `createdEmployee` so a failed delete does not leave files on the demo admin, and so a second attachment spec can run in parallel.
 
 ### Coverage
 

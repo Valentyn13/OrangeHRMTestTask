@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page, type Response } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 import type { ApplicationMethod, CandidateStatus } from '../../utils/types';
 
 export class CandidatesSearchForm {
@@ -75,15 +75,15 @@ export class CandidatesSearchForm {
   }
 
   async submit(): Promise<void> {
-    const results = this.listResponse(Date.now());
+    const results = this.listResponse();
     await this.searchButton.click();
-    await this.expectListed(await results);
+    await results;
   }
 
   async clear(): Promise<void> {
-    const results = this.listResponse(Date.now());
+    const results = this.listResponse();
     await this.resetButton.click();
-    await this.expectListed(await results);
+    await results;
   }
 
   private field(label: string): Locator {
@@ -97,23 +97,11 @@ export class CandidatesSearchForm {
     await this.page.getByRole('option', { name: option, exact: true }).click();
   }
 
-  private listResponse(since: number) {
-    return this.page.waitForResponse((response) => {
-      if (!response.url().includes('/api/v2/recruitment/candidates') || !response.url().includes('model=list')) {
-        return false;
-      }
-      return response.request().timing().startTime >= since;
-    });
-  }
-
-  private async expectListed(response: Response): Promise<void> {
-    const body = (await response.json()) as { meta?: { total?: number } };
-    const total = body.meta?.total ?? 0;
-    const records = this.page.locator('.orangehrm-horizontal-padding .oxd-text--span');
-    if (total === 0) {
-      await expect(records).toHaveText('No Records Found');
-    } else {
-      await expect(records).toContainText(`(${total})`);
-    }
+  private listResponse() {
+    return this.page.waitForResponse((response) =>
+      response.ok() &&
+      response.url().includes('/api/v2/recruitment/candidates') &&
+      response.url().includes('model=list'),
+    );
   }
 }

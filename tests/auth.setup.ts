@@ -4,11 +4,10 @@ import { authStatePath, credentialsFor, ensureAuthDir, saveAuthCookie } from '..
 import { roles } from '../utils/types';
 import { routes } from '../utils/routes';
 
-ensureAuthDir();
-
 // ESS user disabled because DB resets every hour
 for (const role of roles.filter((role) => role !== 'ess')) {
   setup(`Authenticate as ${role}`, async ({ page }) => {
+    ensureAuthDir();
     const { username, password } = credentialsFor(role);
 
     const loginPage = new LoginPage(page);

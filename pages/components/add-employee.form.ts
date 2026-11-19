@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import type { NewEmployee } from '../../utils/types';
+import type { EmployeeInput } from '../../utils/types';
 
 export class AddEmployeeForm {
   readonly firstNameInput: Locator;
@@ -16,7 +16,7 @@ export class AddEmployeeForm {
     this.saveButton = page.getByRole('button', { name: 'Save' });
   }
 
-  async create(employee: NewEmployee): Promise<void> {
+  async create(employee: EmployeeInput): Promise<void> {
     await this.firstNameInput.fill(employee.firstName);
     await this.lastNameInput.fill(employee.lastName);
     await expect(this.employeeId).not.toHaveValue('');

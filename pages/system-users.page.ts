@@ -21,8 +21,24 @@ export class SystemUsersPage {
   }
 
   async searchByUsername(username: string): Promise<void> {
+    const listed = this.page.waitForResponse((response) => {
+      if (response.request().method() !== 'GET' || !response.ok()) return false;
+      const url = new URL(response.url());
+      return url.pathname.includes('/api/v2/admin/users') && url.searchParams.get('username') === username;
+    });
     await this.search.fillUsername(username);
     await this.search.searchButton.click();
+    await listed;
+  }
+
+  async confirmDelete(): Promise<void> {
+    const deleted = this.page.waitForResponse((response) =>
+      response.request().method() === 'DELETE' &&
+      response.url().includes('/api/v2/admin/users') &&
+      response.ok(),
+    );
+    await this.confirmDeleteButton.click();
+    await deleted;
   }
 
   async open(): Promise<void> {

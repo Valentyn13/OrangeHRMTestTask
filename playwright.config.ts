@@ -1,29 +1,26 @@
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import { authStatePath, baseUrl } from './config/env';
 import { RoleOptions } from './utils/types';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const baseURL = process.env.BASE_URL ?? 'https://opensource-demo.orangehrmlive.com';
-
-const authFile = (role: 'admin' | 'ess') =>
-  path.join(__dirname, 'playwright', '.auth', `${role}.json`);
-
 export default defineConfig<RoleOptions>({
   testDir: './tests',
   fullyParallel: true,
-  retries: 0,
+  retries: process.env.CI ? 2 : 0,
+  forbidOnly: !!process.env.CI,
   workers: 4,
   reporter: 'html',
-  timeout: 90_000,
-  expect: { timeout: 60_000 },
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
   use: {
-    baseURL,
-    trace: 'on-first-retry',
+    baseURL: baseUrl(),
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    actionTimeout: 30_000,
-    navigationTimeout: 60_000,
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
   },
   projects: [
     {
@@ -41,7 +38,7 @@ export default defineConfig<RoleOptions>({
       testIgnore: /login\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
-        storageState: authFile('admin'),
+        storageState: authStatePath('admin'),
         role: 'admin',
       },
     },
@@ -52,7 +49,7 @@ export default defineConfig<RoleOptions>({
     //   testIgnore: /login\.spec\.ts/,
     //   use: {
     //     ...devices['Desktop Chrome'],
-    //     storageState: authFile('ess'),
+    //     storageState: authStatePath('ess'),
     //     role: 'ess',
     //   },
     // },

@@ -53,7 +53,7 @@ test('Delete a system user', async ({ systemUsersPage, createdUser }) => {
   await systemUsersPage.open();
   await systemUsersPage.searchByUsername(createdUser.username);
   await systemUsersPage.users.deleteButton(createdUser).click();
-  await systemUsersPage.confirmDeleteButton.click();
+  await systemUsersPage.confirmDelete();
   await systemUsersPage.searchByUsername(createdUser.username);
 
   await expect(systemUsersPage.users.row(createdUser)).toHaveCount(0);
