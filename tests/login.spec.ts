@@ -22,7 +22,7 @@ test('Empty login form vields validation, shows error messages', async ({ loginP
   await expect(loginPage.fieldError('password')).toHaveText('Required');
 });
 
-test('rejects invalid credentials', async ({ loginPage }) => {
+test('Reject invalid credentials', async ({ loginPage }) => {
   await loginPage.open();
   
   await loginPage.login('not-a-user', 'wrong-password');

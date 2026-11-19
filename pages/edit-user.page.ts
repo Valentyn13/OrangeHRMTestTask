@@ -16,7 +16,7 @@ export class EditUserPage {
   readonly userRole: Locator;
   readonly employeeName: Locator;
   readonly status: Locator;
-  readonly username: Locator;
+  readonly usernameInput: Locator;
   readonly saveButton: Locator;
 
   constructor(private readonly page: Page) {
@@ -24,15 +24,15 @@ export class EditUserPage {
     this.userRole = this.field('User Role').locator('.oxd-select-text');
     this.employeeName = this.field('Employee Name').getByPlaceholder('Type for hints...');
     this.status = this.field('Status').locator('.oxd-select-text');
-    this.username = this.field('Username').locator('input');
+    this.usernameInput = this.field('Username').locator('input');
     this.saveButton = this.form.getByRole('button', { name: 'Save' });
   }
 
-  async update(changes: { username: string }): Promise<void> {
+  async updateUserDetails(changes: { username: string }): Promise<void> {
 
     // Wait for form data loading to complete, and the loader to be hidden
     // I will wait only for username, no need to check other fields
-    await expect(this.username).not.toHaveValue('');
+    await expect(this.usernameInput).not.toHaveValue('');
     await expect(this.page.locator('.oxd-form-loader')).toHaveCount(0);
 
     // Create a listener for the username validation request
@@ -57,7 +57,7 @@ export class EditUserPage {
     });
 
     // Fill the username input
-    await this.username.fill(changes.username);
+    await this.usernameInput.fill(changes.username);
 
     // Validate the username validation request
     const validationResponse = await validationListener;

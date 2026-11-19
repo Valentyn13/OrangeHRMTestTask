@@ -5,21 +5,21 @@ import type { NewSystemUser } from '../utils/types';
 export class AddUserPage {
   readonly form: Locator;
   readonly userRole: Locator;
-  readonly employeeName: Locator;
+  readonly employeeNameInput: Locator;
   readonly status: Locator;
-  readonly username: Locator;
-  readonly password: Locator;
-  readonly confirmPassword: Locator;
+  readonly usernameInput: Locator;
+  readonly passwordInput: Locator;
+  readonly confirmPasswordInput: Locator;
   readonly saveButton: Locator;
 
   constructor(private readonly page: Page) {
     this.form = page.locator('form.oxd-form');
     this.userRole = this.field('User Role').locator('.oxd-select-text');
-    this.employeeName = this.field('Employee Name').getByPlaceholder('Type for hints...');
+    this.employeeNameInput = this.field('Employee Name').getByPlaceholder('Type for hints...');
     this.status = this.field('Status').locator('.oxd-select-text');
-    this.username = this.field('Username').locator('input');
-    this.password = this.field('Password').locator('input');
-    this.confirmPassword = this.field('Confirm Password').locator('input');
+    this.usernameInput = this.field('Username').locator('input');
+    this.passwordInput = this.field('Password').locator('input');
+    this.confirmPasswordInput = this.field('Confirm Password').locator('input');
     this.saveButton = this.form.getByRole('button', { name: 'Save' });
   }
 
@@ -27,9 +27,9 @@ export class AddUserPage {
     await this.select(this.userRole, user.userRole);
     await this.selectEmployee(user.employeeName);
     await this.select(this.status, user.status);
-    await this.username.fill(user.username);
-    await this.password.fill(user.password);
-    await this.confirmPassword.fill(user.password);
+    await this.usernameInput.fill(user.username);
+    await this.passwordInput.fill(user.password);
+    await this.confirmPasswordInput.fill(user.password);
     await this.saveButton.click();
     await this.page.waitForURL(new RegExp(`${routes.systemUsers}$`));
   }
@@ -48,7 +48,7 @@ export class AddUserPage {
   private async selectEmployee(employeeName: string): Promise<void> {
     const pattern = new RegExp(`^${employeeName.trim().split(/\s+/).join('\\s+')}$`);
 
-    await this.employeeName.fill(employeeName);
+    await this.employeeNameInput.fill(employeeName);
     await this.page
       .locator('.oxd-autocomplete-option')
       .filter({ hasNotText: 'Searching' })

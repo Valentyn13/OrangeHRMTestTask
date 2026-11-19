@@ -9,16 +9,16 @@ export class CandidatesPage {
   readonly pageTitle: Locator;
   readonly addButton: Locator;
   readonly recordsFound: Locator;
-  readonly search: CandidatesSearchForm;
-  readonly candidates: CandidatesTable;
+  readonly searchInput: CandidatesSearchForm;
+  readonly candidatesTable: CandidatesTable;
 
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.getByRole('heading', { name: 'Candidates' });
     this.addButton = page.locator('.orangehrm-header-container').getByRole('button', { name: 'Add' });
     this.recordsFound = page.locator('.orangehrm-horizontal-padding .oxd-text--span');
-    this.search = new CandidatesSearchForm(page);
-    this.candidates = new CandidatesTable(page);
+    this.searchInput = new CandidatesSearchForm(page);
+    this.candidatesTable = new CandidatesTable(page);
   }
 
   async open(): Promise<void> {
@@ -40,30 +40,30 @@ export class CandidatesPage {
 
   async applyFilters(filters: CandidateFilters): Promise<void> {
     if (filters.jobTitle) {
-      await this.search.selectJobTitle(filters.jobTitle);
+      await this.searchInput.selectJobTitle(filters.jobTitle);
     }
     if (filters.vacancy) {
-      await this.search.selectVacancy(filters.vacancy);
+      await this.searchInput.selectVacancy(filters.vacancy);
     }
     if (filters.hiringManager) {
-      await this.search.selectHiringManager(filters.hiringManager);
+      await this.searchInput.selectHiringManager(filters.hiringManager);
     }
     if (filters.status) {
-      await this.search.selectStatus(filters.status);
+      await this.searchInput.selectStatus(filters.status);
     }
     if (filters.candidateName) {
-      await this.search.selectCandidate(filters.candidateName);
+      await this.searchInput.selectCandidate(filters.candidateName);
     }
     if (filters.keywords) {
-      await this.search.fillKeywords(filters.keywords);
+      await this.searchInput.fillKeywords(filters.keywords);
     }
     if (filters.applicationFrom && filters.applicationTo) {
-      await this.search.fillApplicationDates(filters.applicationFrom, filters.applicationTo);
+      await this.searchInput.fillApplicationDates(filters.applicationFrom, filters.applicationTo);
     }
     if (filters.method) {
-      await this.search.selectMethod(filters.method);
+      await this.searchInput.selectMethod(filters.method);
     }
 
-    await this.search.submit();
+    await this.searchInput.submit();
   }
 }

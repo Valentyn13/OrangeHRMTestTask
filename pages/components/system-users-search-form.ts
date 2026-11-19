@@ -3,25 +3,25 @@ import { UserRole, UserStatus } from '../../utils/types';
 
 export class SystemUsersSearchForm {
     readonly form: Locator;
-    readonly username: Locator;
+    readonly usernameInput: Locator;
     readonly userRole: Locator;
-    readonly employeeName: Locator;
+    readonly employeeNameInput: Locator;
     readonly status: Locator;
-    readonly search: Locator;
-    readonly reset: Locator;
+    readonly searchButton: Locator;
+    readonly resetButton: Locator;
   
     constructor(private readonly page: Page) {
       this.form = page.locator('form.oxd-form');
-      this.username = this.field('Username').locator('input');
+      this.usernameInput = this.field('Username').locator('input');
       this.userRole = this.field('User Role').locator('.oxd-select-text');
-      this.employeeName = this.field('Employee Name').getByPlaceholder('Type for hints...');
+      this.employeeNameInput = this.field('Employee Name').getByPlaceholder('Type for hints...');
       this.status = this.field('Status').locator('.oxd-select-text');
-      this.search = this.form.getByRole('button', { name: 'Search' });
-      this.reset = this.form.getByRole('button', { name: 'Reset' });
+      this.searchButton = this.form.getByRole('button', { name: 'Search' });
+      this.resetButton = this.form.getByRole('button', { name: 'Reset' });
     }
   
     async fillUsername(username: string): Promise<void> {
-      await this.username.fill(username);
+      await this.usernameInput.fill(username);
     }
   
     async selectUserRole(userRole: UserRole): Promise<void> {
@@ -29,7 +29,7 @@ export class SystemUsersSearchForm {
     }
   
     async selectEmployee(employeeName: string): Promise<void> {
-      await this.employeeName.fill(employeeName);
+      await this.employeeNameInput.fill(employeeName);
       await this.page
         .locator('.oxd-autocomplete-option')
         .filter({ hasNotText: 'Searching' })

@@ -8,7 +8,7 @@ ensureAuthDir();
 
 // ESS user disabled because DB resets every hour
 for (const role of roles.filter((role) => role !== 'ess')) {
-  setup(`authenticate as ${role}`, async ({ page }) => {
+  setup(`Authenticate as ${role}`, async ({ page }) => {
     const { username, password } = credentialsFor(role);
 
     const loginPage = new LoginPage(page);

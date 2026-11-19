@@ -34,7 +34,7 @@ test('Update a system user', async ({ page, systemUsersPage, editUserPage, creat
   await systemUsersPage.users.editButton(createdUser).click();
   await expect(page).toHaveURL(new RegExp(`${routes.saveSystemUser}/\\d+$`));
 
-  await editUserPage.update({ username: newUsername });
+  await editUserPage.updateUserDetails({ username: newUsername });
   await expect(page).toHaveURL(new RegExp(`${routes.systemUsers}$`));
   
   await systemUsersPage.searchByUsername(newUsername);
@@ -49,11 +49,11 @@ test('Update a system user', async ({ page, systemUsersPage, editUserPage, creat
   ).toBeVisible();
 });
 
-test('deletes a system user', async ({ systemUsersPage, createdUser }) => {
+test('Delete a system user', async ({ systemUsersPage, createdUser }) => {
   await systemUsersPage.open();
   await systemUsersPage.searchByUsername(createdUser.username);
   await systemUsersPage.users.deleteButton(createdUser).click();
-  await systemUsersPage.confirmDelete.click();
+  await systemUsersPage.confirmDeleteButton.click();
   await systemUsersPage.searchByUsername(createdUser.username);
 
   await expect(systemUsersPage.users.row(createdUser)).toHaveCount(0);

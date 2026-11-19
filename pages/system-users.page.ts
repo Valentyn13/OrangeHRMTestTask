@@ -9,7 +9,7 @@ export class SystemUsersPage {
   readonly addUserButton: Locator;
   readonly search: SystemUsersSearchForm;
   readonly users: SystemUsersTable;
-  readonly confirmDelete: Locator;
+  readonly confirmDeleteButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -17,12 +17,12 @@ export class SystemUsersPage {
     this.addUserButton = page.locator('.orangehrm-header-container').getByRole('button', { name: 'Add' });
     this.search = new SystemUsersSearchForm(page);
     this.users = new SystemUsersTable(page);
-    this.confirmDelete = page.getByRole('button', { name: 'Yes, Delete' });
+    this.confirmDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });
   }
 
   async searchByUsername(username: string): Promise<void> {
     await this.search.fillUsername(username);
-    await this.search.search.click();
+    await this.search.searchButton.click();
   }
 
   async open(): Promise<void> {
