@@ -47,6 +47,16 @@ export type Vacancy = VacancyInput & {
   hiringManager: string;
 };
 
+export const vacancyStatuses = ['Active', 'Closed'] as const;
+export type VacancyStatus = (typeof vacancyStatuses)[number];
+
+export type VacancyFilters = {
+  jobTitle?: string;
+  vacancy?: string;
+  hiringManager?: string;
+  status?: VacancyStatus;
+};
+
 export const roles = ['admin', 'ess'] as const;
 export type Role = (typeof roles)[number];
 

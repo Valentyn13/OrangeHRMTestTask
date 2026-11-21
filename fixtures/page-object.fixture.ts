@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test';
 import { AddEmployeeForm } from '../pages/components/add-employee.form';
 import { AddUserPage } from '../pages/add-user.page';
 import { CandidatesPage } from '../pages/candidates.page';
+import { VacanciesPage } from '../pages/vacancies.page';
 import { RoleOptions } from '../utils/types';
 import { DashboardPage } from '../pages/dashboard.page';
 import { EditUserPage } from '../pages/edit-user.page';
@@ -20,6 +21,7 @@ type PageFixtures = {
     editUserPage: EditUserPage;
     myInfoPage: MyInfoPage;
     candidatesPage: CandidatesPage;
+    vacanciesPage: VacanciesPage;
   };
 
   export const pageObjectFixture = base.extend<PageFixtures & RoleOptions>({
@@ -49,5 +51,8 @@ type PageFixtures = {
       },
       candidatesPage: async ({ page }, use) => {
         await use(new CandidatesPage(page));
+      },
+      vacanciesPage: async ({ page }, use) => {
+        await use(new VacanciesPage(page));
       },
   });

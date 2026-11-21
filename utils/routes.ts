@@ -9,6 +9,7 @@ export const routes = {
   saveSystemUser: 'admin/saveSystemUser',
   employeeList: 'pim/viewEmployeeList',
   addEmployee: 'pim/addEmployee',
+  jobVacancies: 'recruitment/viewJobVacancy',
   candidates: 'recruitment/viewCandidates',
   employeeDetails: (empNumber: number) => `pim/viewPersonalDetails/empNumber/${empNumber}`,
 } as const;
@@ -25,6 +26,7 @@ export const urls = {
   adminUsers: '/api/v2/admin/users',
   userNameValidation: '/api/v2/admin/validation/user-name',
   candidates: '/api/v2/recruitment/candidates',
+  vacancies: '/api/v2/recruitment/vacancies',
   employeeDetails: (empNumber: number) =>
     new RegExp(`/pim/viewPersonalDetails/empNumber/${empNumber}$`),
   employeeDetailsPattern: /\/pim\/viewPersonalDetails\/empNumber\/\d+$/,
