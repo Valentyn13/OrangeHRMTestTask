@@ -1,43 +1,34 @@
-import { expect, type Locator, type Page, type Response } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { urls } from '../utils/routes';
-
-async function assertOk(response: Response, label: string): Promise<void> {
-  if (response.ok()) return;
-  throw new Error(`${label} failed: ${response.status()} ${await response.text()}`);
-}
-
-function readUsername(body: string | null): string | undefined {
-  if (!body) return;
-  try {
-    const username = JSON.parse(body).username;
-    return typeof username === 'string' ? username : undefined;
-  } catch {
-    return;
-  }
-}
+import { assertOk, readUsername } from '../utils/helpers';
+import type { SystemUser } from '../utils/types';
 
 export class EditUserPage {
   readonly form: Locator;
-  readonly userRole: Locator;
-  readonly employeeName: Locator;
-  readonly status: Locator;
+  readonly userRoleInput: Locator;
+  readonly employeeNameInput: Locator;
+  readonly statusInput: Locator;
   readonly usernameInput: Locator;
   readonly saveButton: Locator;
 
   constructor(private readonly page: Page) {
     this.form = page.locator('form.oxd-form');
-    this.userRole = this.field('User Role').locator('.oxd-select-text');
-    this.employeeName = this.field('Employee Name').getByPlaceholder('Type for hints...');
-    this.status = this.field('Status').locator('.oxd-select-text');
+    this.userRoleInput = this.field('User Role').locator('.oxd-select-text');
+    this.employeeNameInput = this.field('Employee Name').getByPlaceholder('Type for hints...');
+    this.statusInput = this.field('Status').locator('.oxd-select-text');
     this.usernameInput = this.field('Username').locator('input');
     this.saveButton = this.form.getByRole('button', { name: 'Save' });
   }
 
-  async updateUserDetails(changes: { username: string }): Promise<void> {
+  async updateUserDetails(changes: SystemUser): Promise<void> {
     // Wait for form data loading to complete, and the loader to be hidden.
     // Username is enough; the other fields load with it.
     await expect(this.usernameInput).not.toHaveValue('');
     await expect(this.page.locator('.oxd-form-loader')).toHaveCount(0);
+
+    await this.select(this.userRoleInput, changes.userRole);
+    await this.selectEmployee(changes.employeeName);
+    await this.select(this.statusInput, changes.status);
 
     const validationListener = this.page.waitForResponse((res) => {
       if (res.request().method() !== 'GET') return false;
@@ -68,5 +59,21 @@ export class EditUserPage {
     return this.form.locator('.oxd-input-group').filter({
       has: this.page.locator('label', { hasText: new RegExp(`^${label}$`) }),
     });
+  }
+
+  private async select(dropdown: Locator, option: string): Promise<void> {
+    await dropdown.click();
+    await this.page.getByRole('option', { name: option, exact: true }).click();
+  }
+
+  private async selectEmployee(employeeName: string): Promise<void> {
+    const pattern = new RegExp(`^${employeeName.trim().split(/\s+/).join('\\s+')}$`);
+
+    await this.employeeNameInput.fill(employeeName);
+    await this.page
+      .locator('.oxd-autocomplete-option')
+      .filter({ hasNotText: 'Searching' })
+      .getByText(pattern)
+      .click();
   }
 }

@@ -1,4 +1,5 @@
 import type { Candidate, CandidateInput, EmployeeInput, SearchableCandidate, UserInput, Vacancy, VacancyInput } from "./types";
+import type { Response } from '@playwright/test';
 const letters = 'abcdefghijklmnopqrstuvwxyz';
 
 function randomLetters(length: number): string {
@@ -87,4 +88,20 @@ export function searchable(candidate: Candidate): SearchableCandidate {
     throw new Error(`created candidate ${candidate.fullName} is missing search fields`);
   }
   return candidate;
+}
+
+
+export async function assertOk(response: Response, label: string): Promise<void> {
+  if (response.ok()) return;
+  throw new Error(`${label} failed: ${response.status()} ${await response.text()}`);
+}
+
+export function readUsername(body: string | null): string | undefined {
+  if (!body) return;
+  try {
+    const username = JSON.parse(body).username;
+    return typeof username === 'string' ? username : undefined;
+  } catch {
+    return;
+  }
 }

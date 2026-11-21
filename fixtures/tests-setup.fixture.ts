@@ -18,6 +18,7 @@ import type { Candidate, Employee, Role, User, Vacancy } from '../utils/types';
 
 type TestSetupFixtures = {
   createdEmployee: Employee;
+  replacementEmployee: Employee;
   createdUser: User;
   candidateCount: number;
   createdCandidates: Candidate[];
@@ -48,6 +49,16 @@ export const testSetupFixture = base.extend<TestSetupFixtures, WorkerSetupFixtur
   }, { scope: 'worker' }],
 
   createdEmployee: async ({ apiContext }, use) => {
+    const employee = await createEmployee(apiContext, disposableEmployee());
+    try {
+      await use(employee);
+    } finally {
+      const userIds = await userIdsByEmployee(apiContext, employee.empNumber).catch(() => []);
+      await deleteUsers(apiContext, userIds);
+      await deleteEmployees(apiContext, [employee.empNumber]);
+    }
+  },
+  replacementEmployee: async ({ apiContext }, use) => {
     const employee = await createEmployee(apiContext, disposableEmployee());
     try {
       await use(employee);
