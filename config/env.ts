@@ -12,7 +12,7 @@ const credentialKeys = {
 export function baseUrl(): string {
   const url = process.env.BASE_URL;
   if (!url) throw new Error('Missing BASE_URL. Copy .env.example to .env.');
-  return url;
+  return url.endsWith('/') ? url : `${url}/`;
 }
 
 export function credentialsFor(role: Role): { username: string; password: string } {

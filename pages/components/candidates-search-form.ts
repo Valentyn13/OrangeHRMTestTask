@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { urls } from '../../utils/routes';
 import type { ApplicationMethod, CandidateStatus } from '../../utils/types';
 
 export class CandidatesSearchForm {
@@ -100,7 +101,7 @@ export class CandidatesSearchForm {
   private listResponse() {
     return this.page.waitForResponse((response) =>
       response.ok() &&
-      response.url().includes('/api/v2/recruitment/candidates') &&
+      response.url().includes(urls.candidates) &&
       response.url().includes('model=list'),
     );
   }

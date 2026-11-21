@@ -1,5 +1,6 @@
 import { request, type APIRequestContext, type APIResponse } from '@playwright/test';
 import { baseUrl } from '../config/env';
+import { apiRoutes } from './routes';
 import {
   candidateStatuses,
   type Candidate,
@@ -98,7 +99,7 @@ export function createApiContext(cookie: string): Promise<APIRequestContext> {
 }
 
 export async function createEmployee(api: APIRequestContext, employee: EmployeeInput): Promise<Employee> {
-  const response = await api.post('/web/index.php/api/v2/pim/employees', {
+  const response = await api.post(apiRoutes.employees, {
     data: {
       empPicture: null,
       employeeId: employee.employeeId,
@@ -122,7 +123,7 @@ export async function createUser(
   empNumber: number,
   user: UserInput,
 ): Promise<User> {
-  const response = await api.post('/web/index.php/api/v2/admin/users', {
+  const response = await api.post(apiRoutes.users, {
     data: {
       empNumber,
       username: user.username,
@@ -145,7 +146,7 @@ export async function createUser(
 
 export async function deleteEmployees(api: APIRequestContext, ids: number[]): Promise<void> {
   if (ids.length === 0) return;
-  const response = await api.delete('/web/index.php/api/v2/pim/employees', {
+  const response = await api.delete(apiRoutes.employees, {
     data: { ids },
   });
   await readOk(response, 'deleteEmployees', [404]);
@@ -153,7 +154,7 @@ export async function deleteEmployees(api: APIRequestContext, ids: number[]): Pr
 
 export async function deleteVacancies(api: APIRequestContext, ids: number[]): Promise<void> {
   if (ids.length === 0) return;
-  const response = await api.delete('/web/index.php/api/v2/recruitment/vacancies', {
+  const response = await api.delete(apiRoutes.vacancies, {
     data: { ids },
   });
   await readOk(response, 'deleteVacancies', [404]);
@@ -161,14 +162,14 @@ export async function deleteVacancies(api: APIRequestContext, ids: number[]): Pr
 
 export async function deleteUsers(api: APIRequestContext, ids: number[]): Promise<void> {
   if (ids.length === 0) return;
-  const response = await api.delete('/web/index.php/api/v2/admin/users', {
+  const response = await api.delete(apiRoutes.users, {
     data: { ids },
   });
   await readOk(response, 'deleteUsers', [404]);
 }
 
 export async function createVacancy(api: APIRequestContext, vacancy: VacancyInput): Promise<Vacancy> {
-  const response = await api.post('/web/index.php/api/v2/recruitment/vacancies', {
+  const response = await api.post(apiRoutes.vacancies, {
     data: {
       name: vacancy.name,
       jobTitleId: vacancy.jobTitleId,
@@ -199,7 +200,7 @@ type IdListResponse = {
 };
 
 export async function firstJobTitleId(api: APIRequestContext): Promise<number> {
-  const response = await api.get('/web/index.php/api/v2/admin/job-titles', {
+  const response = await api.get(apiRoutes.jobTitles, {
     params: { limit: 1, offset: 0 },
   });
   const listed = readJson<IdListResponse>(await readOk(response, 'firstJobTitleId'), 'firstJobTitleId');
@@ -209,7 +210,7 @@ export async function firstJobTitleId(api: APIRequestContext): Promise<number> {
 }
 
 export async function createCandidate(api: APIRequestContext, candidate: CandidateInput): Promise<Candidate> {
-  const response = await api.post('/web/index.php/api/v2/recruitment/candidates', {
+  const response = await api.post(apiRoutes.candidates, {
     params: { model: 'list' },
     data: {
       firstName: candidate.firstName,
@@ -254,14 +255,14 @@ export async function createCandidate(api: APIRequestContext, candidate: Candida
 
 export async function deleteCandidates(api: APIRequestContext, ids: number[]): Promise<void> {
   if (ids.length === 0) return;
-  const response = await api.delete('/web/index.php/api/v2/recruitment/candidates', {
+  const response = await api.delete(apiRoutes.candidates, {
     data: { ids },
   });
   await readOk(response, 'deleteCandidates', [404]);
 }
 
 export async function userIdsByEmployee(api: APIRequestContext, empNumber: number): Promise<number[]> {
-  const response = await api.get('/web/index.php/api/v2/admin/users', {
+  const response = await api.get(apiRoutes.users, {
     params: { empNumber, limit: 50, offset: 0 },
   });
   const listed = readJson<UserListResponse>(await readOk(response, 'userIdsByEmployee'), 'userIdsByEmployee');

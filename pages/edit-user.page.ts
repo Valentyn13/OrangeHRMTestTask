@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, type Response } from '@playwright/test';
+import { urls } from '../utils/routes';
 
 async function assertOk(response: Response, label: string): Promise<void> {
   if (response.ok()) return;
@@ -42,7 +43,7 @@ export class EditUserPage {
       if (res.request().method() !== 'GET') return false;
       const url = new URL(res.url());
       return (
-        url.pathname.endsWith('/api/v2/admin/validation/user-name') &&
+        url.pathname.endsWith(urls.userNameValidation) &&
         url.searchParams.get('userName') === changes.username
       );
     });

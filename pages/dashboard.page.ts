@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { Role } from '../utils/types';
-import { routes } from '../utils/routes';
+import { pageHref, routes } from '../utils/routes';
 
 type MenuItem = {
   name: string;
@@ -8,21 +8,21 @@ type MenuItem = {
 };
 
 const sharedMenus = [
-  { name: 'Leave', href: '/web/index.php/leave/viewLeaveModule' },
-  { name: 'Time', href: '/web/index.php/time/viewTimeModule' },
-  { name: 'My Info', href: '/web/index.php/pim/viewMyDetails' },
-  { name: 'Performance', href: '/web/index.php/performance/viewPerformanceModule' },
-  { name: 'Dashboard', href: '/web/index.php/dashboard/index' },
-  { name: 'Directory', href: '/web/index.php/directory/viewDirectory' },
-  { name: 'Claim', href: '/web/index.php/claim/viewClaimModule' },
-  { name: 'Buzz', href: '/web/index.php/buzz/viewBuzz' },
+  { name: 'Leave', href: 'leave/viewLeaveModule' },
+  { name: 'Time', href: 'time/viewTimeModule' },
+  { name: 'My Info', href: 'pim/viewMyDetails' },
+  { name: 'Performance', href: 'performance/viewPerformanceModule' },
+  { name: 'Dashboard', href: 'dashboard/index' },
+  { name: 'Directory', href: 'directory/viewDirectory' },
+  { name: 'Claim', href: 'claim/viewClaimModule' },
+  { name: 'Buzz', href: 'buzz/viewBuzz' },
 ] as const satisfies readonly MenuItem[];
 
 const adminOnlyMenus = [
-  { name: 'Admin', href: '/web/index.php/admin/viewAdminModule' },
-  { name: 'PIM', href: '/web/index.php/pim/viewPimModule' },
-  { name: 'Recruitment', href: '/web/index.php/recruitment/viewRecruitmentModule' },
-  { name: 'Maintenance', href: '/web/index.php/maintenance/viewMaintenanceModule' },
+  { name: 'Admin', href: 'admin/viewAdminModule' },
+  { name: 'PIM', href: 'pim/viewPimModule' },
+  { name: 'Recruitment', href: 'recruitment/viewRecruitmentModule' },
+  { name: 'Maintenance', href: 'maintenance/viewMaintenanceModule' },
 ] as const satisfies readonly MenuItem[];
 
 const sharedWidgets = [
@@ -80,7 +80,7 @@ export class DashboardPage {
   }
 
   menu(item: MenuItem): Locator {
-    return this.page.locator(`a.oxd-main-menu-item[href="${item.href}"]`);
+    return this.page.locator(`a.oxd-main-menu-item[href="${pageHref(item.href)}"]`);
   }
 
   widget(name: string): Locator {

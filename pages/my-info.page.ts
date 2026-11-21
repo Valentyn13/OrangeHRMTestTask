@@ -1,5 +1,5 @@
 import { expect, type Download, type Locator, type Page } from '@playwright/test';
-import { routes } from '../utils/routes';
+import { pageHref, routes } from '../utils/routes';
 
 export type Attachment = {
   fileName: string;
@@ -36,7 +36,7 @@ export class MyInfoPage {
 
   async openFromMenu(): Promise<void> {
     await this.page.goto(routes.dashboard);
-    await this.page.locator(`a.oxd-main-menu-item[href="${routes.myInfo}"]`).click();
+    await this.page.locator(`a.oxd-main-menu-item[href="${pageHref(routes.myInfo)}"]`).click();
   }
 
   async openEmployee(empNumber: number): Promise<void> {

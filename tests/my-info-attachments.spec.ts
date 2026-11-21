@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { test } from '../fixtures';
 import { expect } from '@playwright/test';
+import { urls } from '../utils/routes';
 
 const fileName = 'test_image.png';
 const filePath = path.join(__dirname, '../utils/assets', fileName);
@@ -11,9 +12,7 @@ test('Creates, downloads, and deletes an attachment', async ({ myInfoPage, creat
   const attachment = { fileName, comment };
 
   await myInfoPage.openEmployee(createdEmployee.empNumber);
-  await expect(myInfoPage.page).toHaveURL(
-    new RegExp(`/pim/viewPersonalDetails/empNumber/${createdEmployee.empNumber}$`),
-  );
+  await expect(myInfoPage.page).toHaveURL(urls.employeeDetails(createdEmployee.empNumber));
 
   try {
     await myInfoPage.addButton.click();

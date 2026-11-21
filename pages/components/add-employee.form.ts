@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { urls } from '../../utils/routes';
 import type { EmployeeInput } from '../../utils/types';
 
 export class AddEmployeeForm {
@@ -22,6 +23,6 @@ export class AddEmployeeForm {
     await expect(this.employeeId).not.toHaveValue('');
     await this.employeeId.fill(employee.employeeId);
     await this.saveButton.click();
-    await this.page.waitForURL(/\/pim\/viewPersonalDetails\/empNumber\/\d+$/);
+    await this.page.waitForURL(urls.employeeDetailsPattern);
   }
 }

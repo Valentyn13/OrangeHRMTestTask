@@ -1,5 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
-import { routes } from '../utils/routes';
+import { routes, urls } from '../utils/routes';
 import { SystemUsersSearchForm } from './components/system-users-search-form';
 import { SystemUsersTable } from './components/system-users-table';
 
@@ -24,7 +24,7 @@ export class SystemUsersPage {
     const listed = this.page.waitForResponse((response) => {
       if (response.request().method() !== 'GET' || !response.ok()) return false;
       const url = new URL(response.url());
-      return url.pathname.includes('/api/v2/admin/users') && url.searchParams.get('username') === username;
+      return url.pathname.includes(urls.adminUsers) && url.searchParams.get('username') === username;
     });
     await this.search.fillUsername(username);
     await this.search.searchButton.click();
@@ -34,7 +34,7 @@ export class SystemUsersPage {
   async confirmDelete(): Promise<void> {
     const deleted = this.page.waitForResponse((response) =>
       response.request().method() === 'DELETE' &&
-      response.url().includes('/api/v2/admin/users') &&
+      response.url().includes(urls.adminUsers) &&
       response.ok(),
     );
     await this.confirmDeleteButton.click();

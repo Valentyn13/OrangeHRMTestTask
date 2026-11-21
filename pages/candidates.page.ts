@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import type { CandidateFilters } from '../utils/types';
-import { routes } from '../utils/routes';
+import { routes, urls } from '../utils/routes';
 import { CandidatesSearchForm } from './components/candidates-search-form';
 import { CandidatesTable } from './components/candidates-table';
 
@@ -24,7 +24,7 @@ export class CandidatesPage {
   async open(): Promise<void> {
     const listed = this.page.waitForResponse(
       (response) =>
-        response.url().includes('/api/v2/recruitment/candidates') &&
+        response.url().includes(urls.candidates) &&
         response.url().includes('model=list') &&
         response.ok(),
     );
