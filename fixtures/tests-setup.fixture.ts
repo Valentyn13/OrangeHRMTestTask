@@ -20,6 +20,8 @@ type TestSetupFixtures = {
   createdEmployee: Employee;
   replacementEmployee: Employee;
   createdUser: User;
+  disabledAdmin: User;
+  disabledEss: User;
   candidateCount: number;
   createdCandidates: Candidate[];
 };
@@ -78,6 +80,33 @@ export const testSetupFixture = base.extend<TestSetupFixtures, WorkerSetupFixtur
       await use(user);
     } finally {
       await deleteUsers(apiContext, [user.id]);
+    }
+  },
+  disabledAdmin: async ({ apiContext }, use) => {
+    const employee = await createEmployee(apiContext, disposableEmployee());
+    const user = await createUser(apiContext, employee.empNumber, {
+      ...disposableSystemUser(employee.fullName),
+      userRole: 'Admin',
+      status: 'Disabled',
+    });
+    try {
+      await use(user);  
+    } finally {
+      await deleteUsers(apiContext, [user.id]);
+      await deleteEmployees(apiContext, [employee.empNumber]);
+    }
+  },
+  disabledEss: async ({ apiContext }, use) => {
+    const employee = await createEmployee(apiContext, disposableEmployee());
+    const user = await createUser(apiContext, employee.empNumber, {
+      ...disposableSystemUser(employee.fullName),
+      status: 'Disabled',
+    });
+    try {
+      await use(user);
+    } finally {
+      await deleteUsers(apiContext, [user.id]);
+      await deleteEmployees(apiContext, [employee.empNumber]);
     }
   },
   createdVacancies: [async ({ apiContext, vacancyCount }, use) => {

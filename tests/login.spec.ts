@@ -30,7 +30,23 @@ test('Reject invalid credentials', async ({ loginPage }) => {
   await expect(loginPage.page).toHaveURL(new RegExp(`${routes.login}$`));
 });
 
-// ESS user disabled because DB resets every hour
+test('Reject disabled admin account', async ({ loginPage, disabledAdmin }) => {
+  await loginPage.open();
+
+  await loginPage.login(disabledAdmin.username, disabledAdmin.password);
+  await expect(loginPage.alertLabel).toContainText('Account disabled');
+  await expect(loginPage.page).toHaveURL(new RegExp(`${routes.login}$`));
+});
+
+test('Reject disabled ess account', async ({ loginPage, disabledEss }) => {
+  await loginPage.open();
+
+  await loginPage.login(disabledEss.username, disabledEss.password);
+  await expect(loginPage.alertLabel).toContainText('Account disabled');
+  await expect(loginPage.page).toHaveURL(new RegExp(`${routes.login}$`));
+});
+
+// Env ESS account is wiped on the hourly DB reset.
 for (const role of roles.filter((role) => role !== 'ess')) {
   test(`${role} signs in and lands on the dashboard`, async ({ loginPage }) => {
     const { username, password } = credentialsFor(role);
@@ -41,3 +57,10 @@ for (const role of roles.filter((role) => role !== 'ess')) {
     await expect(loginPage.page).toHaveURL(new RegExp(`${routes.dashboard}$`));
   });
 }
+
+test('Ess user signs in and lands on the dashboard', async ({ loginPage, createdUser }) => {
+  await loginPage.open();
+  await loginPage.login(createdUser.username, createdUser.password);
+
+  await expect(loginPage.page).toHaveURL(new RegExp(`${routes.dashboard}$`));
+});

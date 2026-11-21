@@ -29,6 +29,7 @@ export default defineConfig<RoleOptions>({
     },
     {
       name: 'login',
+      dependencies: ['setup'],
       testMatch: /login\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
