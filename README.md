@@ -2,7 +2,7 @@
 
 End-to-end tests for the public [OrangeHRM demo](https://opensource-demo.orangehrmlive.com).
 
-CI is disabled until GitHub billing is fixed.
+CI runs successfully!
 
 ## Prerequisites
 
@@ -86,7 +86,7 @@ utils/
   routes.ts                   UI paths shared by pages and auth.setup
   assets/test_image.png       Attachment used by my-info specs
 
-.github/workflows/playwright.yml   CI: npm ci, install browsers, copy .env.example, run tests
+.github/workflows/playwright.yml   CI: npm ci, install browsers, GitHub secrets as env, run tests
 ```
 
 `playwright/.auth/` is created by `auth.setup` and gitignored. Specs import `test` from `fixtures/index.ts`, which merges page-object fixtures with the API setup fixtures. A spec that asks for `createdUser` also gets `createdEmployee` (the user is attached to that employee). `apiContext` is created once per worker from `orangehrmCookie` and reused for every API call. `createdVacancies` is worker-scoped (`vacancyCount`, default 1); `createdCandidates` is per test (`candidateCount`, default 1) and is attached to those vacancies. Candidate teardown runs after each test. Vacancy teardown runs when the worker exits. `vacancyCount` is worker-scoped: set it once per file with a top-level `test.use`, or in the project config. Two files that share a worker cannot set different values. `candidateCount` is per test: `test.use({ candidateCount: 3 })`.

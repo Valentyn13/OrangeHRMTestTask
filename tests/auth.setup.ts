@@ -1,14 +1,11 @@
 import { expect, test as setup } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
-import { authStatePath, credentialsFor, ensureAuthDir, saveAuthCookie } from '../config/env';
-import { roles } from '../utils/types';
+import { authStatePath, credentialsForAdmin, ensureAuthDir, saveAuthCookie } from '../config/env';
 import { routes } from '../utils/routes';
 
-// ESS user disabled because DB resets every hour
-for (const role of roles.filter((role) => role !== 'ess')) {
-  setup(`Authenticate as ${role}`, async ({ page }) => {
+  setup(`Authenticate as admin`, async ({ page }) => {
     ensureAuthDir();
-    const { username, password } = credentialsFor(role);
+    const { username, password } = credentialsForAdmin();
 
     const loginPage = new LoginPage(page);
 
@@ -18,9 +15,8 @@ for (const role of roles.filter((role) => role !== 'ess')) {
     await expect(page).toHaveURL(new RegExp(`${routes.dashboard}$`));
 
     const orangehrm = (await page.context().cookies()).find((cookie) => cookie.name === 'orangehrm');
-    if (!orangehrm) throw new Error(`No orangehrm cookie after ${role} login`);
-    saveAuthCookie(role, orangehrm.value);
+    if (!orangehrm) throw new Error(`No orangehrm cookie after admin login`);
+    saveAuthCookie('admin', orangehrm.value);
 
-    await page.context().storageState({ path: authStatePath(role) });
-  });
-}
+  await page.context().storageState({ path: authStatePath('admin') });
+});

@@ -1,5 +1,4 @@
-import { credentialsFor } from '../config/env';
-import { roles } from '../utils/types';
+import { credentialsForAdmin } from '../config/env';
 import { routes } from '../utils/routes';
 import { test } from '../fixtures';
 import { expect } from '@playwright/test';
@@ -47,16 +46,14 @@ test('Reject disabled ess account', async ({ loginPage, disabledEss }) => {
 });
 
 // Env ESS account is wiped on the hourly DB reset.
-for (const role of roles.filter((role) => role !== 'ess')) {
-  test(`${role} signs in and lands on the dashboard`, async ({ loginPage }) => {
-    const { username, password } = credentialsFor(role);
+test(`Admin signs in and lands on the dashboard`, async ({ loginPage }) => {
+  const { username, password } = credentialsForAdmin();
 
-    await loginPage.open();
-    await loginPage.login(username, password);
+  await loginPage.open();
+  await loginPage.login(username, password);
 
-    await expect(loginPage.page).toHaveURL(new RegExp(`${routes.dashboard}$`));
-  });
-}
+  await expect(loginPage.page).toHaveURL(new RegExp(`${routes.dashboard}$`));
+});
 
 test('Ess user signs in and lands on the dashboard', async ({ loginPage, createdUser }) => {
   await loginPage.open();

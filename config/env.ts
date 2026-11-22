@@ -6,7 +6,6 @@ const root = path.resolve(__dirname, '..');
 
 const credentialKeys = {
   admin: { username: 'ADMIN_USERNAME', password: 'ADMIN_PASSWORD' },
-  ess: { username: 'ESS_USERNAME', password: 'ESS_PASSWORD' },
 } as const;
 
 export function baseUrl(): string {
@@ -15,8 +14,8 @@ export function baseUrl(): string {
   return url.endsWith('/') ? url : `${url}/`;
 }
 
-export function credentialsFor(role: Role): { username: string; password: string } {
-  const keys = credentialKeys[role];
+export function credentialsForAdmin(): { username: string; password: string } {
+  const keys = credentialKeys.admin;
   const username = process.env[keys.username];
   const password = process.env[keys.password];
 
