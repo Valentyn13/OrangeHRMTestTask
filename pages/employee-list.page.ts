@@ -5,7 +5,7 @@ export class EmployeeListPage {
   readonly addButton: Locator;
 
   constructor(private readonly page: Page) {
-    this.addButton = page.locator('.orangehrm-header-container').getByRole('button', { name: 'Add' });
+    this.addButton = page.getByRole('button', { name: 'Add' });
   }
 
   async open(): Promise<void> {

@@ -1,13 +1,9 @@
 import { vacancyColumns } from '../pages/components/vacancies-table';
 import { test } from '../fixtures';
 import { expect } from '@playwright/test';
-import type { Vacancy, VacancyStatus } from '../utils/types';
+import type { VacancyStatus } from '../utils/types';
+import { defaultSelectTextValue, statusOfVacancy } from '../utils/helpers';
 
-test.describe.configure({ timeout: 180_000 });
-
-function statusOf(vacancy: Vacancy): VacancyStatus {
-  return vacancy.isOpen ? 'Active' : 'Closed';
-}
 
 test('Filter vacancies by name', async ({ vacanciesPage, createdVacancies }) => {
   const vacancy = createdVacancies[0];
@@ -43,7 +39,7 @@ test('Filter vacancies by hiring manager', async ({ vacanciesPage, createdVacanc
 
 test('Filter vacancies by status', async ({ vacanciesPage, createdVacancies }) => {
   const vacancy = createdVacancies[0];
-  const status = statusOf(vacancy);
+  const status = statusOfVacancy(vacancy);
   const other: VacancyStatus = status === 'Active' ? 'Closed' : 'Active';
   await vacanciesPage.open();
 
@@ -71,7 +67,7 @@ test('Filter vacancies by job title and name together', async ({ vacanciesPage, 
 
 test('Reset vacancy filters', async ({ vacanciesPage, createdVacancies }) => {
   const vacancy = createdVacancies[0];
-  const status = statusOf(vacancy);
+  const status = statusOfVacancy(vacancy);
   const { searchInput } = vacanciesPage;
   await vacanciesPage.open();
 
@@ -82,8 +78,8 @@ test('Reset vacancy filters', async ({ vacanciesPage, createdVacancies }) => {
 
   await searchInput.clear();
 
-  await expect(searchInput.jobTitle).toHaveText('-- Select --');
-  await expect(searchInput.vacancyInput).toHaveText('-- Select --');
-  await expect(searchInput.hiringManagerInput).toHaveText('-- Select --');
-  await expect(searchInput.status).toHaveText('-- Select --');
+  await expect(searchInput.jobTitle).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.vacancyInput).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.hiringManagerInput).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.status).toHaveText(defaultSelectTextValue);
 });

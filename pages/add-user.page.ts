@@ -3,7 +3,6 @@ import { routes } from '../utils/routes';
 import type { UserInput } from '../utils/types';
 
 export class AddUserPage {
-  readonly form: Locator;
   readonly userRole: Locator;
   readonly employeeNameInput: Locator;
   readonly status: Locator;
@@ -13,14 +12,13 @@ export class AddUserPage {
   readonly saveButton: Locator;
 
   constructor(private readonly page: Page) {
-    this.form = page.locator('form.oxd-form');
     this.userRole = this.field('User Role').locator('.oxd-select-text');
     this.employeeNameInput = this.field('Employee Name').getByPlaceholder('Type for hints...');
     this.status = this.field('Status').locator('.oxd-select-text');
     this.usernameInput = this.field('Username').locator('input');
     this.passwordInput = this.field('Password').locator('input');
     this.confirmPasswordInput = this.field('Confirm Password').locator('input');
-    this.saveButton = this.form.getByRole('button', { name: 'Save' });
+    this.saveButton = this.page.getByRole('button', { name: 'Save' });
   }
 
   async create(user: UserInput): Promise<void> {
@@ -35,7 +33,7 @@ export class AddUserPage {
   }
 
   private field(label: string): Locator {
-    return this.form.locator('.oxd-input-group').filter({
+    return this.page.locator('.oxd-input-group').filter({
       has: this.page.locator('label', { hasText: new RegExp(`^${label}$`) }),
     });
   }

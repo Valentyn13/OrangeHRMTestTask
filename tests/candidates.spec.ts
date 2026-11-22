@@ -1,7 +1,7 @@
 import { candidateColumns } from '../pages/components/candidates-table';
 import { test } from '../fixtures';
 import { expect } from '@playwright/test';
-import { searchable, shiftApplicationDate } from '../utils/helpers';
+import { defaultSelectTextValue, searchable, shiftApplicationDate } from '../utils/helpers';
 test.describe.configure({ timeout: 180_000 });
 
 test('Filter candidates by name', async ({ candidatesPage, createdCandidates }) => {
@@ -112,13 +112,30 @@ test('Filter candidates by status and vacancy together', async ({ candidatesPage
 
 test('Reset candidate filters', async ({ candidatesPage, createdCandidates }) => {
   const candidate = searchable(createdCandidates[0]);
+  const { searchInput } = candidatesPage;
   await candidatesPage.open();
-  const unfiltered = await candidatesPage.recordCount();
 
-  await candidatesPage.applyFilters({ keywords: candidate.keywords });
-  await expect.poll(async () => candidatesPage.recordCount()).toBe(1);
+  await searchInput.selectJobTitle(candidate.jobTitle);
+  await searchInput.selectVacancy(candidate.vacancy);
+  await searchInput.selectHiringManager(candidate.hiringManager);
+  await searchInput.selectStatus(candidate.status);
+  await searchInput.selectCandidate(candidate.firstName);
+  await searchInput.fillKeywords(candidate.keywords);
+  await searchInput.fillApplicationDates(
+    shiftApplicationDate(candidate.applicationDate, -1),
+    candidate.applicationDate,
+  );
+  await searchInput.selectMethod(candidate.method);
 
-  await candidatesPage.searchInput.clear();
+  await searchInput.clear();
 
-  await expect.poll(async () => candidatesPage.recordCount()).toBe(unfiltered);
+  await expect(searchInput.jobTitle).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.vacancyInput).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.hiringManagerInput).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.status).toHaveText(defaultSelectTextValue);
+  await expect(searchInput.candidateNameInput).toHaveValue('');
+  await expect(searchInput.keywordsInput).toHaveValue('');
+  await expect(searchInput.applicationFromInput).toHaveValue('');
+  await expect(searchInput.applicationToInput).toHaveValue('');
+  await expect(searchInput.method).toHaveText(defaultSelectTextValue);
 });

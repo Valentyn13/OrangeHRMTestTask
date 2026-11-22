@@ -14,7 +14,7 @@ export class SystemUsersPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.getByRole('heading', { name: 'System Users' });
-    this.addUserButton = page.locator('.orangehrm-header-container').getByRole('button', { name: 'Add' });
+    this.addUserButton = page.getByRole('button', { name: 'Add' });
     this.search = new SystemUsersSearchForm(page);
     this.users = new SystemUsersTable(page);
     this.confirmDeleteButton = page.getByRole('button', { name: 'Yes, Delete' });

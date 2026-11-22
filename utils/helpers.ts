@@ -1,6 +1,9 @@
-import type { Candidate, CandidateInput, EmployeeInput, SearchableCandidate, UserInput, Vacancy, VacancyInput } from "./types";
+import type { Candidate, CandidateInput, EmployeeInput, SearchableCandidate, UserInput, Vacancy, VacancyInput, VacancyStatus } from "./types";
 import type { Response } from '@playwright/test';
 const letters = 'abcdefghijklmnopqrstuvwxyz';
+
+export const defaultSelectTextValue = '-- Select --';
+
 
 function randomLetters(length: number): string {
   return Array.from({ length }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
@@ -104,4 +107,8 @@ export function readUsername(body: string | null): string | undefined {
   } catch {
     return;
   }
+}
+
+export function statusOfVacancy(vacancy: Vacancy): VacancyStatus {
+  return vacancy.isOpen ? 'Active' : 'Closed';
 }

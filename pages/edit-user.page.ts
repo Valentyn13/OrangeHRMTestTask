@@ -4,7 +4,6 @@ import { assertOk, readUsername } from '../utils/helpers';
 import type { SystemUser } from '../utils/types';
 
 export class EditUserPage {
-  readonly form: Locator;
   readonly userRoleInput: Locator;
   readonly employeeNameInput: Locator;
   readonly statusInput: Locator;
@@ -12,12 +11,11 @@ export class EditUserPage {
   readonly saveButton: Locator;
 
   constructor(private readonly page: Page) {
-    this.form = page.locator('form.oxd-form');
     this.userRoleInput = this.field('User Role').locator('.oxd-select-text');
     this.employeeNameInput = this.field('Employee Name').getByPlaceholder('Type for hints...');
     this.statusInput = this.field('Status').locator('.oxd-select-text');
     this.usernameInput = this.field('Username').locator('input');
-    this.saveButton = this.form.getByRole('button', { name: 'Save' });
+    this.saveButton = this.page.getByRole('button', { name: 'Save' });
   }
 
   async updateUserDetails(changes: SystemUser): Promise<void> {
@@ -56,7 +54,7 @@ export class EditUserPage {
   }
 
   private field(label: string): Locator {
-    return this.form.locator('.oxd-input-group').filter({
+    return this.page.locator('.oxd-input-group').filter({
       has: this.page.locator('label', { hasText: new RegExp(`^${label}$`) }),
     });
   }
